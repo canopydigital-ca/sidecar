@@ -1,0 +1,31 @@
+<script lang="ts">
+  import { inview } from "$lib/actions/inview";
+  import "$lib/styles/reveal.css";
+  import data from "$lib/content/roadmap.json";
+  import { ListChecks } from "lucide-svelte";
+</script>
+
+<section id="roadmap" class="py-32 border-t border-zinc-900">
+  <div class="container mx-auto px-6">
+    <div class="text-center max-w-2xl mx-auto mb-16">
+      <h2 class="text-3xl md:text-5xl font-bold text-white mb-6">{data.headline}</h2>
+      <p class="text-zinc-400 text-lg">{data.subhead}</p>
+    </div>
+
+    <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+      {#each data.items as item, i (item.title)}
+        <div use:inview class="rounded-2xl bg-zinc-900/60 border border-zinc-800 p-6 reveal" style={`transition-delay:${i * 80}ms`}>
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center text-emerald-400 shrink-0">
+              <ListChecks class="w-5 h-5" />
+            </div>
+            <div>
+              <h3 class="text-white font-semibold mb-1">{item.title}</h3>
+              <p class="text-zinc-400 leading-relaxed">{item.body}</p>
+            </div>
+          </div>
+        </div>
+      {/each}
+    </div>
+  </div>
+</section>

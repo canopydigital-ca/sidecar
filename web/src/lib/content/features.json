@@ -1,0 +1,52 @@
+[
+  {
+    "icon": "Layout",
+    "title": "Smart Dock",
+    "description": "A persistent sidebar dock for instant access to your favorite tools and settings without cluttering the UI."
+  },
+  {
+    "icon": "PanelLeft",
+    "title": "Sidebar Toggle",
+    "description": "Effortlessly toggle the main conversation sidebar to focus purely on your chat content."
+  },
+  {
+    "icon": "Maximize2",
+    "title": "Wide Mode",
+    "description": "Break free from the centered narrow view. Expand the conversation to utilize your full screen width."
+  },
+  {
+    "icon": "Minimize2",
+    "title": "Input Control",
+    "description": "Resize or collapse the input area to view more of the conversation history at once."
+  },
+  {
+    "icon": "Code",
+    "title": "Code Superpowers",
+    "description": "Collapsible code blocks for better readability and instant HTML previews for web developers."
+  },
+  {
+    "icon": "MessageSquare",
+    "title": "Prompt Library",
+    "description": "Save frequently used prompts and access your recent history instantly. Never re-type the same context."
+  },
+  {
+    "icon": "Activity",
+    "title": "Live Status Bar",
+    "description": "Real-time tracking of token usage, word count, and estimated API costs at a glance."
+  },
+  {
+    "icon": "Cpu",
+    "title": "Model Switcher",
+    "description": "Relocated model picker in the dock for faster switching between models."
+  },
+  {
+    "icon": "Type",
+    "title": "Custom Typography",
+    "description": "Personalize your reading experience by changing font families to System or Google Fonts."
+  },
+  {
+    "icon": "Settings",
+    "title": "Full Config",
+    "description": "Deep customization of extension behavior with import/export capabilities for your settings."
+  }
+]

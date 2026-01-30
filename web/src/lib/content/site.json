@@ -1,0 +1,13 @@
+{
+  "brand": "Sidecar",
+  "storeTitle": "Sidecar for ChatGPT: Toolbox + Dock",
+  "tagline": "A toolbox + dock that upgrades ChatGPT without clutter.",
+  "versionBadge": "Sidecar v2.0 is now available",
+  "heroHeadline": "Supercharge your",
+  "heroAccent": "Chat Experience",
+  "heroBody": "Sidecar is the productivity toolbox for ChatGPT: a smart dock, wide mode, token tracking, macros, and code tools built right into your interface.",
+  "githubUrl": "https://github.com/your-org/sidecar",
+  "ctaPrimary": "Install Sidecar",
+  "ctaSecondary": "View GitHub / Source",
+  "legalDisclaimer": "Not affiliated with OpenAI."
+}

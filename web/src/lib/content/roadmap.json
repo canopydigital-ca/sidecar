@@ -1,0 +1,38 @@
+{
+  "headline": "Roadmap bits (the \u201cnice to have\u201d pile)",
+  "subhead": "A few of the bigger upgrades that fit your spec. These are landing-page bullets, not promises.",
+  "items": [
+    {
+      "title": "Page title cleanup",
+      "body": "Strip \u201cChatGPT - \u201d from the tab title when running in the extension context."
+    },
+    {
+      "title": "Popover UX",
+      "body": "Popovers close on outside click and on actions inside them."
+    },
+    {
+      "title": "Grab handle animation",
+      "body": "Cute micro-handle that expands on hover and animates smoothly."
+    },
+    {
+      "title": "Prompt recall in composer",
+      "body": "Up-arrow previews recent prompts; Right-arrow inserts full prompt."
+    },
+    {
+      "title": "Scroll + wide mode safeguards",
+      "body": "Stop auto-scroll to bottom optionally; fix wide-mode overflow on long prompts."
+    },
+    {
+      "title": "Message collapsing",
+      "body": "Collapse long chats with preview + char count; auto-collapse on send over X chars."
+    },
+    {
+      "title": "Your code blocks",
+      "body": "Detect ``` in your messages, render styled blocks, syntax highlight, click-to-copy."
+    },
+    {
+      "title": "Font scaling",
+      "body": "Scale Sidecar UI without changing browser zoom."
+    }
+  ]
+}

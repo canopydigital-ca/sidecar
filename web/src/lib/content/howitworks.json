@@ -1,0 +1,17 @@
+[
+  {
+    "title": "Install from your store",
+    "body": "Add Sidecar from Chrome Web Store, Edge Add-ons, or Firefox Add-ons. (Links are placeholders until you ship.)",
+    "icon": "Download"
+  },
+  {
+    "title": "Enable it on ChatGPT",
+    "body": "Open ChatGPT and toggle Sidecar on. If it\u2019s enabled, it\u2019s available. No pinning ritual required.",
+    "icon": "ToggleRight"
+  },
+  {
+    "title": "Run macros + commands",
+    "body": "Use Ctrl+K to open the command palette. Save macros, replay flows, and keep your hands on the keyboard.",
+    "icon": "Command"
+  }
+]

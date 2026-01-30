@@ -1,0 +1,26 @@
+{
+  "headline": "Macros that actually help",
+  "subhead": "A command palette + macro store designed to automate your workflow without hijacking ChatGPT\u2019s composer.",
+  "items": [
+    {
+      "icon": "Command",
+      "title": "Command Palette (Ctrl+K)",
+      "body": "Type commands in Sidecar\u2019s palette input only. No slash-command hacks in the native composer, no IME breakage."
+    },
+    {
+      "icon": "Workflow",
+      "title": "Macros + Flow Scripts",
+      "body": "Save, share, publish, and run macro automation scripts that feed into your Flow engine (flow.ts)."
+    },
+    {
+      "icon": "History",
+      "title": "Terminal-like History",
+      "body": "Up/Down cycles your recent commands like a shell. Persisted in chrome.storage.local and capped to keep it sane."
+    },
+    {
+      "icon": "Gauge",
+      "title": "Token estimates, lazily",
+      "body": "Cache per thread, refresh in idle time, and avoid re-tokenizing the universe on every mutation."
+    }
+  ]
+}

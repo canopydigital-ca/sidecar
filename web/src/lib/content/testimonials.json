@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Avery N.",
+    "role": "Frontend Dev",
+    "quote": "Finally: wide mode + prompt library without hacking the DOM every week.",
+    "rating": 5
+  },
+  {
+    "name": "Jordan K.",
+    "role": "Analyst",
+    "quote": "Token tracking and a clean dock makes long sessions way less chaotic.",
+    "rating": 5
+  },
+  {
+    "name": "Sam R.",
+    "role": "Writer",
+    "quote": "I just want fewer clicks. Sidecar does that. Shockingly effective.",
+    "rating": 4
+  }
+]

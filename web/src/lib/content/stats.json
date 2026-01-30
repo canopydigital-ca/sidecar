@@ -1,0 +1,27 @@
+[
+  {
+    "label": "Active Users",
+    "target": 50000,
+    "suffix": "+",
+    "note": "rolling 30d"
+  },
+  {
+    "label": "Prompts Saved",
+    "target": 2000000,
+    "suffix": "+",
+    "note": "across devices"
+  },
+  {
+    "label": "Tokens Tracked",
+    "target": 500000000,
+    "suffix": "+",
+    "note": "approx"
+  },
+  {
+    "label": "Rating",
+    "target": 4.9,
+    "suffix": "/5",
+    "note": "store average",
+    "decimals": 1
+  }
+]
