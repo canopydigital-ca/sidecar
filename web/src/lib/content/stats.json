@@ -1,27 +1,28 @@
 [
   {
-    "label": "Active Users",
-    "target": 50000,
-    "suffix": "+",
-    "note": "rolling 30d"
+    "label": "Time Saved",
+    "target": 2,
+    "suffix": "h/wk",
+    "note": "projected per user",
+    "decimals": 0
   },
   {
-    "label": "Prompts Saved",
-    "target": 2000000,
+    "label": "Prompt Library",
+    "target": 100,
     "suffix": "+",
-    "note": "across devices"
+    "note": "templates included"
   },
   {
-    "label": "Tokens Tracked",
-    "target": 500000000,
-    "suffix": "+",
-    "note": "approx"
+    "label": "Privacy Focus",
+    "target": 100,
+    "suffix": "%",
+    "note": "local storage only"
   },
   {
-    "label": "Rating",
-    "target": 4.9,
-    "suffix": "/5",
-    "note": "store average",
+    "label": "Beta Status",
+    "target": 2,
+    "suffix": ".0",
+    "note": "public preview available",
     "decimals": 1
   }
 ]

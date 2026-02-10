@@ -1,20 +1,20 @@
 [
   {
-    "name": "Avery N.",
-    "role": "Frontend Dev",
-    "quote": "Finally: wide mode + prompt library without hacking the DOM every week.",
+    "name": "Alex M.",
+    "role": "Beta Tester",
+    "quote": "The wide mode completely changed how I read code snippets. No more horizontal scrolling madness.",
     "rating": 5
   },
   {
-    "name": "Jordan K.",
-    "role": "Analyst",
-    "quote": "Token tracking and a clean dock makes long sessions way less chaotic.",
+    "name": "Sarah K.",
+    "role": "Beta Tester",
+    "quote": "I love that my macros are stored locally. Finally, a productivity tool that respects my privacy.",
     "rating": 5
   },
   {
-    "name": "Sam R.",
-    "role": "Writer",
-    "quote": "I just want fewer clicks. Sidecar does that. Shockingly effective.",
+    "name": "Devin R.",
+    "role": "Early Access",
+    "quote": "The token counter in the dock is a game changer for managing my API usage context window.",
     "rating": 4
   }
 ]
