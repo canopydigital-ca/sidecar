@@ -1,0 +1,51 @@
+{
+  "manifest_version": 3,
+  "name": "ChatGPT Dock (UI + Perf)",
+  "version": "0.5.67",
+  "description": "Dock UI for ChatGPT: wide mode, resizable sidebar, moved model picker, per-block code collapse, input resize handle + collapse/restore, fonts picker, prompts saver + recent prompts, settings + status bar (idle/chunked).",
+  "background": {
+    "service_worker": "dist/background.js",
+    "type": "module"
+  },
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://game-icons.net/*"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; img-src 'self' data: https://game-icons.net"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*"
+      ],
+      "js": [
+        "dist/chatgpt-dock-ui.umd.js",
+        "dist/content.js"
+      ],
+      "css": [
+        "styles.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "dist/pets/**",
+        "dist/pq/**",
+        "dist/vendor/**",
+        "styles.css",
+        "dist/chatgpt-dock.css"
+      ],
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://*.chatgpt.com/*",
+        "https://chat.openai.com/*"
+      ]
+    }
+  ]
+}

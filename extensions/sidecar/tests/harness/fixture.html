@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>ChatGPT Dock Harness</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      height: 100vh;
+      margin: 0;
+    }
+
+    aside {
+      width: 260px;
+      flex-shrink: 0;
+      background: #202123;
+      color: white;
+      padding: 10px;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #343541;
+      position: relative;
+    }
+
+    .flex-1 {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .composer {
+      border-top: 1px solid #555;
+      padding: 20px;
+    }
+
+    #prompt-textarea {
+      width: 100%;
+      height: 50px;
+      background: #40414f;
+      border: 1px solid #555;
+      color: white;
+      white-space: pre-wrap;
+    }
+
+    /* Mock classes */
+    .markdown {
+      color: #eee;
+    }
+
+    code {
+      background: #000;
+      padding: 2px 4px;
+    }
+
+    pre {
+      background: #000;
+      padding: 10px;
+    }
+
+    /* Model picker mock */
+    .model-picker-btn {
+      background: #333;
+      color: white;
+      padding: 5px;
+    }
+  </style>
+  <script>
+    const storageData = {};
+    window.__mockInvalidation = false;
+
+    function makeArea() {
+      return {
+        get: (keys, cb) => {
+          const exec = () => {
+            if (window.__mockInvalidation) {
+              window.chrome.runtime.lastError = { message: "Extension context invalidated" };
+              const empty = {};
+              if (cb) cb(empty);
+              window.chrome.runtime.lastError = null;
+              return empty;
+            }
+
+            const res = {};
+            if (Array.isArray(keys)) {
+              keys.forEach(k => res[k] = storageData[k]);
+            } else if (typeof keys === 'object') {
+              for (const k in keys) {
+                res[k] = storageData[k] !== undefined ? storageData[k] : keys[k];
+              }
+            } else if (typeof keys === 'string') {
+              res[keys] = storageData[keys];
+            } else {
+              Object.assign(res, storageData);
+            }
+            if (cb) cb(res);
+            return res;
+          };
+          if (typeof cb === 'function') {
+            setTimeout(exec, 10);
+            return;
+          }
+          return new Promise((resolve) => {
+            setTimeout(() => resolve(exec()), 10);
+          });
+        },
+        set: (items, cb) => {
+          const exec = () => {
+            if (window.__mockInvalidation) {
+              window.chrome.runtime.lastError = { message: "Extension context invalidated" };
+              if (cb) cb();
+              window.chrome.runtime.lastError = null;
+              return;
+            }
+
+            Object.assign(storageData, items);
+            if (cb) cb();
+          };
+          if (typeof cb === 'function') {
+            setTimeout(exec, 10);
+            return;
+          }
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              exec();
+              resolve();
+            }, 10);
+          });
+        },
+        remove: (keys, cb) => {
+          const exec = () => {
+            const kList = Array.isArray(keys) ? keys : [keys];
+            kList.forEach(k => delete storageData[k]);
+            if (cb) cb();
+          };
+          if (typeof cb === 'function') {
+            setTimeout(exec, 10);
+            return;
+          }
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              exec();
+              resolve();
+            }, 10);
+          });
+        }
+      };
+    }
+
+    const onChanged = {
+      addListener: () => { },
+      removeListener: () => { }
+    };
+
+    window.chrome = {
+      runtime: {
+        getURL: (path) => path,
+        lastError: null
+      },
+      storage: {
+        local: makeArea(),
+        sync: makeArea(),
+        session: makeArea(),
+        onChanged
+      }
+    };
+  </script>
+</head>
+
+<body>
+  <!-- Sidebar Toggles (Mock) -->
+  <div class="h-header-height flex items-center justify-center"
+    style="min-height: 40px; min-width: 40px; background: rgba(0,255,0,0.1);">
+    <span class="" data-state="closed">
+      <button
+        class="text-token-text-primary no-draggable hover:bg-token-surface-hover keyboard-focused:bg-token-surface-hover touch:h-10 touch:w-10 flex h-9 w-9 items-center justify-center rounded-lg focus:outline-none disabled:opacity-50 mx-2 cursor-e-resize rtl:cursor-w-resize"
+        aria-label="Open sidebar" aria-expanded="false" aria-controls="stage-slideover-sidebar"
+        style="display: block; width: 36px; height: 36px; background: blue; pointer-events: auto;">
+        Open Sidebar
+      </button>
+    </span>
+  </div>
+
+  <aside id="stage-slideover-sidebar">
+    <div class="flex">
+      <button
+        class="text-token-text-tertiary no-draggable hover:bg-token-surface-hover keyboard-focused:bg-token-surface-hover touch:h-10 touch:w-10 flex h-9 w-9 items-center justify-center rounded-lg focus:outline-none disabled:opacity-50 no-draggable cursor-w-resize rtl:cursor-e-resize"
+        aria-expanded="true" aria-controls="stage-slideover-sidebar" aria-label="Close sidebar"
+        data-testid="close-sidebar-button" data-state="closed" style="display: none;">
+        Close Sidebar
+      </button>
+    </div>
+    <nav aria-label="Chat history">
+      <a href="#"
+        class="flex p-3 items-center gap-3 transition-colors duration-200 text-white cursor-pointer text-sm rounded-md border border-white/20 hover:bg-gray-500/10 h-11 flex-shrink-0 flex-grow overflow-hidden">
+        New chat
+      </a>
+      <!-- Mock Project Menu trigger -->
+      <div style="padding: 10px;">
+        <button id="mock-conv-actions" aria-label="Conversation actions">...</button>
+        <div id="mock-menu" style="display:none;">
+          <div role="menuitem">Share</div>
+          <div role="menuitem" id="mock-project-item">Move to project</div>
+          <div role="menuitem">Delete</div>
+        </div>
+        <script>
+          document.getElementById('mock-conv-actions').addEventListener('click', () => {
+            const m = document.getElementById('mock-menu');
+            m.style.display = m.style.display === 'none' ? 'block' : 'none';
+          });
+          document.getElementById('mock-project-item').addEventListener('click', () => {
+            window.__mockProjectClicked = true;
+          });
+        </script>
+      </div>
+      <div class="flex-col flex-1 transition-opacity duration-500 -mr-2 pr-2 overflow-y-auto">
+        <!-- Sidebar items -->
+        <div class="flex flex-col gap-2 pb-2 text-gray-100 text-sm" id="history">
+          <!-- Current Chat Item -->
+          <li class="group relative rounded-lg active:opacity-90 bg-token-sidebar-surface-secondary"
+            data-testid="history-item-123">
+            <a href="/c/123" draggable="true" class="flex items-center gap-2 p-2" aria-current="page">
+              <div class="flex-1 text-ellipsis max-h-5 overflow-hidden break-all relative">Current Chat</div>
+            </a>
+            <div class="absolute right-1 top-1/2 -translate-y-1/2">
+              <button data-testid="history-item-123-options" aria-label="Conversation actions" aria-haspopup="menu"
+                aria-expanded="false">...</button>
+            </div>
+          </li>
+          <div>Previous Chat 1</div>
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <script>
+    // Sidebar Mock Logic
+    (function () {
+      const sidebarHost = document.getElementById('stage-slideover-sidebar');
+      const scrollport = sidebarHost.querySelector('nav');
+
+      // Use querySelector to match new structure
+      const closeBtn = document.querySelector('[data-testid="close-sidebar-button"]');
+      const openBtn = document.querySelector('button[aria-label="Open sidebar"]');
+
+      // Initial state: width 260px (Open)
+      // openBtn should be hidden, closeBtn visible
+      // Actually, let's start with width 260px, but verify visibility
+
+      function updateState() {
+        const width = parseInt(window.getComputedStyle(sidebarHost).width);
+        const isOpen = width >= 200;
+
+        if (isOpen) {
+          openBtn.style.display = 'none';
+          openBtn.setAttribute('aria-expanded', 'true');
+          closeBtn.style.display = 'block';
+          closeBtn.setAttribute('aria-expanded', 'true');
+        } else {
+          openBtn.style.display = 'block';
+          openBtn.setAttribute('aria-expanded', 'false');
+          closeBtn.style.display = 'none';
+          closeBtn.setAttribute('aria-expanded', 'false');
+        }
+      }
+
+      // Listen for clicks
+      openBtn.addEventListener('click', () => {
+        console.log("Mock: Opening sidebar");
+        sidebarHost.style.width = '260px';
+        // Force nav display to ensure interactive check passes if we rely on it
+        scrollport.style.display = 'block';
+        updateState();
+      });
+
+      closeBtn.addEventListener('click', () => {
+        console.log("Mock: Closing sidebar");
+        sidebarHost.style.width = '0px';
+        scrollport.style.display = 'none';
+        updateState();
+      });
+
+      // Init
+      updateState();
+    })();
+  </script>
+
+  // Initial state: width 260px (Open)
+  // openBtn should be hidden, closeBtn visible
+  // Actually, let's start with width 260px, but verify visibility
+
+  function updateState() {
+  const width = parseInt(window.getComputedStyle(sidebarHost).width);
+  const isOpen = width >= 200;
+
+  if (isOpen) {
+  openBtn.style.display = 'none';
+  openBtn.setAttribute('aria-expanded', 'true');
+  closeBtn.style.display = 'block';
+  closeBtn.setAttribute('aria-expanded', 'true');
+  } else {
+  openBtn.style.display = 'block';
+  openBtn.setAttribute('aria-expanded', 'false');
+  closeBtn.style.display = 'none';
+  closeBtn.setAttribute('aria-expanded', 'false');
+  }
+  }
+
+  // Listen for clicks
+  openBtn.addEventListener('click', () => {
+  sidebarHost.style.width = '260px';
+  updateState();
+  });
+
+  closeBtn.addEventListener('click', () => {
+  sidebarHost.style.width = '0px';
+  updateState();
+  });
+
+  // Init
+  updateState();
+  })();
+  </script>
+  const openSpan = openBtn.closest('span');
+
+  function setSidebarState(open) {
+  if (open) {
+  // OPEN STATE: Open button hidden, Close button visible
+  openBtn.setAttribute('aria-expanded', 'true');
+  openBtn.style.display = 'none';
+  if (openSpan) openSpan.setAttribute('data-state', 'open');
+
+  closeBtn.style.display = 'block';
+  scrollport.removeAttribute('inert');
+  scrollport.style.opacity = '1';
+  scrollport.style.pointerEvents = 'auto';
+  } else {
+  // CLOSED STATE: Open button visible, Close button hidden
+  openBtn.setAttribute('aria-expanded', 'false');
+  openBtn.style.display = 'block';
+  if (openSpan) openSpan.setAttribute('data-state', 'closed');
+
+  closeBtn.style.display = 'none';
+  scrollport.setAttribute('inert', '');
+  scrollport.style.opacity = '0';
+  scrollport.style.pointerEvents = 'none';
+  }
+  }
+
+  if (openBtn) openBtn.addEventListener('click', () => setSidebarState(true));
+  if (closeBtn) closeBtn.addEventListener('click', () => setSidebarState(false));
+
+  // Initial State: Open
+  setSidebarState(true);
+  })();
+  </script>
+
+  <!-- Mock Menu Portal (root level) -->
+  <div id="mock-portal-root"></div>
+  <script>
+    // Wire up mock options button
+    document.addEventListener('click', (e) => {
+      // 1. Handle Move to Project click (delegated)
+      if (e.target && e.target.id === 'mock-move-to-project') {
+        window.spawnMockProjectPicker();
+        return;
+      }
+
+      // 2. Handle Options Button click
+      const btn = e.target.closest('button[data-testid$="-options"]');
+      if (btn) {
+        const expanded = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', !expanded);
+
+        let menu = document.getElementById('mock-options-menu');
+        if (!menu) {
+          menu = document.createElement('div');
+          menu.id = 'mock-options-menu';
+          menu.setAttribute('role', 'menu');
+          menu.style.cssText = 'position: fixed; top: 100px; left: 100px; background: #333; color: white; padding: 10px; z-index: 9999; border: 1px solid #555;';
+          menu.innerHTML = `
+                     <div role="menuitem">Share</div>
+                     <div role="menuitem">Rename</div>
+                     <button role="menuitem" id="mock-move-to-project" style="display:block; width:100%;">Move to project</button>
+                     <div role="menuitem" class="text-red-500">Delete chat</div>
+                 `;
+          document.body.appendChild(menu);
+        } else {
+          menu.remove();
+        }
+      }
+    });
+
+    window.spawnMockProjectPicker = () => {
+      const picker = document.createElement('div');
+      picker.id = 'mock-project-picker';
+      picker.textContent = 'Select a project';
+      picker.style.cssText = 'position: fixed; top: 50%; left: 50%; background: #222; padding: 20px; z-index: 10000;';
+      document.body.appendChild(picker);
+    };
+
+    // Mock location pathname
+    // We can't change window.location.pathname easily in browser context from here without reload,
+    // but the test runner can pushState or we rely on the href matching whatever the current path is.
+    // In fixture, path is usually local file path.
+    // Our logic checks window.location.pathname.
+    // We need to shim window.location or make the item match file path.
+    // Or just rely on fallback (aria-current="page").
+  </script>
+
+  <main>
+    <!-- Header -->
+    <header id="page-header"
+      style="padding: 10px; border-bottom: 1px solid #444; display: flex; justify-content: space-between;">
+      <div id="model-slot-mock">
+        <button aria-label="Model selector, current model is 5.2 Thinking" type="button" id="radix-_R_squb33ih6kcm_"
+          aria-haspopup="menu" aria-expanded="false" data-state="closed" data-testid="model-switcher-dropdown-button"
+          style="view-transition-name:var(--vt-thread-model-switcher)"
+          class="group flex cursor-pointer justify-center items-center gap-1 rounded-lg min-h-9 touch:min-h-10 px-2.5 text-lg hover:bg-token-surface-hover focus-visible:bg-token-surface-hover font-normal whitespace-nowrap focus-visible:outline-none">
+          <div>ChatGPT<!-- --> <span class="text-token-text-tertiary">5.2 Thinking</span></div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" aria-hidden="true"
+            class="icon-sm text-token-text-tertiary">
+            <use href="/cdn/assets/sprites-core-k5zux585.svg#ba3792" fill="currentColor"></use>
+          </svg>
+        </button>
+        <!-- Mock Menu (hidden by default) -->
+        <div id="model-menu-mock" role="menu"
+          style="display:none; position: absolute; background: #333; color: white; padding: 10px; border: 1px solid #555; z-index: 10000;">
+          <div role="menuitem">GPT-4o</div>
+          <div role="menuitem">GPT-4</div>
+        </div>
+        <script>
+          const btn = document.getElementById('radix-_R_squb33ih6kcm_');
+          const menu = document.getElementById('model-menu-mock');
+          btn.addEventListener('click', () => {
+            const expanded = btn.getAttribute('aria-expanded') === 'true';
+            btn.setAttribute('aria-expanded', !expanded);
+            menu.style.display = !expanded ? 'block' : 'none';
+          });
+        </script>
+      </div>
+    </header>
+
+    <div class="flex-1 overflow-hidden">
+      <div class="h-full overflow-y-auto">
+        <!-- Messages -->
+        <div class="flex flex-col text-sm dark:bg-gray-800">
+          <div
+            class="group w-full text-gray-800 dark:text-gray-100 border-b border-black/10 dark:border-gray-900/50 dark:bg-gray-800"
+            data-message-author-role="assistant">
+            <div class="p-4 m-auto">
+              <div class="markdown prose w-full break-words dark:prose-invert light">
+                <p>Here is some code:</p>
+                <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;body&gt;
+  &lt;h1&gt;Hello World&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="cgpt-bottom-spacer"></div>
+      </div>
+    </div>
+
+    <div class="composer" id="thread-bottom-container">
+      <form class="group/composer">
+        <div class="relative flex h-full flex-1 items-stretch md:flex-col">
+          <!-- Pill Composite -->
+          <div class="__composer-pill-composite" style="display: flex; gap: 4px; margin-bottom: 8px;">
+            <button class="__composer-pill">Extended thinking</button>
+            <button class="__composer-pill-remove" aria-label="Remove Extended thinking">x</button>
+          </div>
+
+          <div class="flex w-full items-center">
+            <div
+              class="flex flex-col w-full py-2 flex-grow md:py-3 md:pl-4 relative border border-black/10 bg-white dark:border-gray-900/50 dark:text-white dark:bg-gray-700 rounded-md shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:shadow-[0_0_15px_rgba(0,0,0,0.10)]">
+              <div id="prompt-textarea" class="ProseMirror" contenteditable="true" tabindex="0"></div>
+              <button data-testid="send-button"
+                class="absolute p-1 rounded-md text-gray-500 bottom-1.5 right-1 md:bottom-2.5 md:right-2 hover:bg-gray-100 dark:hover:text-gray-400 dark:hover:bg-gray-900 disabled:hover:bg-transparent dark:disabled:hover:bg-transparent">
+                <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"
+                  stroke-linejoin="round" class="h-4 w-4 mr-1" height="1em" width="1em"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- Script injection target -->
+  <script>
+    // Route gating simulation
+    // Default is "conversation" mode
+    // We can simulate "home" by removing #thread-bottom-container and .composer
+    window.simulateHome = () => {
+      const bottom = document.getElementById("thread-bottom-container");
+      if (bottom) bottom.remove();
+
+      // Also remove composer if it exists outside (unlikely in fixture but safe)
+      const forms = document.querySelectorAll("form.group\\/composer");
+      forms.forEach(f => f.remove());
+    };
+  </script>
+</body>
+
+</html>

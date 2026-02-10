@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="msapplication-TileColor" content="#da532c">
+	<meta name="theme-color" content="#ffffff">
+	<meta http-equiv="Content-Security-Policy"
+		content="default-src 'self'; img-src 'self' data: https://game-icons.net; media-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; worker-src 'self'; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+	<base href="../vendor/progressquest/">
+	<title>ProgressQuest</title>
+	<script src="/dist/pq/bridge.js"></script>
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<link rel="stylesheet" href="/dist/pq/pq-theme.css">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+	<!-- Dock Shell Wrapper -->
+	<div class="cgpt-window">
+		<header class="cgpt-titlebar">
+			<div class="cgpt-title-group">
+				<img src="pq.gif" class="cgpt-icon" alt="PQ">
+				<div class="cgpt-meta">
+					<div class="cgpt-app-name">ProgressQuest</div>
+					<div class="cgpt-char-info" id="shell-char-info">Loading...</div>
+				</div>
+			</div>
+			<div class="cgpt-stats-pills" id="shell-stats">
+				<span class="cgpt-pill" id="shell-level">Lvl -</span>
+				<span class="cgpt-pill" id="shell-gold">0 G</span>
+			</div>
+			<div class="cgpt-controls">
+				<button id="shell-reset-btn" class="cgpt-icon-btn" title="Reset/Reload" aria-label="Reload Game">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+						<path d="M21 3v5h-5" />
+						<path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+						<path d="M8 16H3v5" />
+					</svg>
+				</button>
+				<button id="shell-pause-btn" class="cgpt-icon-btn" title="Pause/Resume"
+					aria-label="Pause or Resume Game">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+						<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+					</svg>
+				</button>
+			</div>
+		</header>
+
+		<div class="cgpt-body">
+
+			<!-- Main Content Area (Original PQ DOM injected here) -->
+			<main class="cgpt-content">
+				<!-- Original PQ Root -->
+				<div class="vbox window" id="main">
+
+					<div id="titlebar" style="display:none !important">
+						<!-- Legacy titlebar hidden by theme but kept for JS safety -->
+						<img src="swords.gif" alt="Progress Quest Remix Logo">
+						<span id="title">Progress Quest Remix</span>
+						<a id="quit"><img src="closeup.png" alt="Close button"></a>
+					</div>
+
+					<script src="jquery-3.6.4.min.js"></script>
+					<script src="config.js"></script>
+					<!-- <script src="main.js"></script> (Loaded by bridge.ts) -->
+
+					<template id="tmpl-newguy">
+						<link rel="stylesheet" href="newguy.css">
+						<div class="vbox window" id="newguy" style="width:100%; height:100%">
+							<div id="titlebar" style="display:none"></div>
+							<div class="client" style="padding:10px; color:white;">
+								<div class="hbox" style="margin-bottom:10px">
+									<label for="Name">Character Name:</label>
+									<input id="Name" spellcheck="false" alt="Character Name"
+										style="background:#333; border:1px solid #555; color:white; padding:4px;">
+									<button id="RandomName" alt="Random Name" class="cgpt-btn-sm">Random Name</button>
+								</div>
+								<div class="hbox">
+									<fieldset class="vbox groupbox" id="races"
+										style="border:1px solid #555; margin-right:10px">
+										<legend>Race</legend>
+									</fieldset>
+									<div class="vbox">
+										<div class="hbox">
+											<fieldset class="vbox groupbox" id="classes"
+												style="border:1px solid #555; margin-right:10px">
+												<legend>Class</legend>
+											</fieldset>
+											<div class="vbox">
+												<fieldset class="groupbox" id="stats" style="border:1px solid #555">
+													<legend>Stats</legend>
+													<table style="width:100%">
+														<tr>
+															<th> STR
+															<td id="STR">13
+														</tr>
+														<tr>
+															<th> CON
+															<td id="CON">23
+														</tr>
+														<tr>
+															<th> DEX
+															<td id="DEX">34
+														</tr>
+														<tr>
+															<th> INT
+															<td id="INT">12
+														</tr>
+														<tr>
+															<th> WIS
+															<td id="WIS">4
+														</tr>
+														<tr>
+															<th> CHA
+															<td id="CHA">12
+														</tr>
+														<tr>
+															<th colspan=2> &nbsp;
+														</tr>
+														<tr>
+															<th> Total
+															<td id="Total">48
+														</tr>
+													</table>
+													<br>
+													<center>
+														<button id="Reroll" class="cgpt-btn-sm">Roll</button> <br><br>
+														<button id="Unroll" disabled class="cgpt-btn-sm">Unroll</button>
+													</center>
+												</fieldset>
+												<fieldset class="groupbox" id="gametype"
+													style="border:1px solid #555; margin-top:10px">
+													<legend>Game Type</legend>
+													<div><input type=radio id=single name=online value=false checked />
+														<label for=single>Single</label>
+													</div>
+													<div><input type=radio id=multiplayer name=online value=true />
+														<label for=multiplayer>Multi</label>
+													</div>
+												</fieldset>
+											</div>
+										</div>
+										<div class="hbox" style="text-align:right; margin-top:20px">
+											<button id=Sold class="cgpt-btn-primary">Sold!</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</template>
+
+					<div class="hbox">
+						<div class="vbox" id="Izquierda">
+
+							<span class="label head">Character Sheet</span>
+
+							<table class="listbox" id="Trats">
+								<thead>
+									<tr>
+										<th>Trait</th>
+										<th>Value</th>
+									</tr>
+								</thead>
+								<tbody id="Traits">
+									<tr>
+										<td>Name</td>
+										<td></td>
+									</tr>
+									<tr>
+										<td>Race</td>
+										<td></td>
+									</tr>
+									<tr>
+										<td>Class</td>
+										<td></td>
+									</tr>
+									<tr>
+										<td>Level</td>
+										<td>1</td>
+									</tr>
+								</tbody>
+
+								<thead class="mid">
+									<tr>
+										<th>Stat</th>
+										<th>Value</th>
+									</tr>
+								</thead>
+								<tbody id="Stats">
+									<tr>
+										<td>STR</td>
+										<td></td>
+									</tr>
+									<tr>
+										<td>CON</td>
+										<td></td>
+									</tr>
+									<tr>
+										<td>DEX</td>
+										<td></td>
+									</tr>
+									<tr>
+										<td>INT</td>
+										<td></td>
+									</tr>
+									<tr>
+										<td>WIS</td>
+										<td></td>
+									</tr>
+									<tr>
+										<td>CHA</td>
+										<td></td>
+									</tr>
+									<tr>
+										<td>HP Max</td>
+										<td></td>
+									</tr>
+									<tr>
+										<td>MP Max</td>
+										<td></td>
+									</tr>
+								</tbody>
+							</table>
+
+							<div class="label">Experience</div>
+
+							<div class="progress-container" id="ExpBar">
+								<div class="hint"></div>
+								<div class="bar"></div>
+							</div>
+
+							<span class="label head">Spell Book</span>
+							<div id="Spells" class="scroll listbox">
+								<table>
+									<thead>
+										<tr>
+											<th class="key">Spell</th>
+											<th class="value">Level</th>
+										</tr>
+									</thead>
+									<tbody>
+									</tbody>
+								</table>
+							</div>
+						</div>
+
+						<div class="vbox" id="Centro">
+							<span class="label head">Equipment</span>
+
+							<table id="Equips" class="listbox">
+								<tbody>
+									<tr>
+										<td>Weapon</td>
+										<td></td>
+									</tr>
+									<tr>
+										<td>Shield</td>
+										<td>
+									</tr>
+									<tr>
+										<td>Helm
+										<td>
+									</tr>
+									<tr>
+										<td>Hauberk
+										<td>
+									</tr>
+									<tr>
+										<td>Brassairts
+										<td>
+									</tr>
+									<tr>
+										<td>Vambraces
+										<td></td>
+									</tr>
+									<tr>
+										<td>Gauntlets
+										<td>
+									</tr>
+									<tr>
+										<td>Gambeson
+										<td>
+									</tr>
+									<tr>
+										<td>Cuisses
+										<td>
+									</tr>
+									<tr>
+										<td>Greaves
+										<td>
+									</tr>
+									<tr>
+										<td>Sollerets
+										<td>
+									</tr>
+								</tbody>
+							</table>
+
+							<span class="label head">Inventory</span>
+							<div id="Inventory" class="scroll listbox">
+								<table>
+									<thead>
+										<tr>
+											<th class="key">Item</th>
+											<th class="value">Qty</th>
+										</tr>
+									</thead>
+									<tbody>
+									</tbody>
+								</table>
+							</div>
+
+							<div class="label">Encumbrance</div>
+							<div class="progress-container" id="EncumBar">
+								<div class="hint"></div>
+								<div class="bar"></div>
+							</div>
+						</div>
+
+
+						<div class="vbox" id="Derecha">
+
+							<span class="label head">Plot Development</span>
+							<div id="Plots" class="scroll listbox">
+								<table>
+									<tbody>
+									</tbody>
+								</table>
+							</div>
+
+							<div class="progress-container" id="PlotBar">
+								<div class="hint"></div>
+								<div class="bar"></div>
+							</div>
+
+							<span class="label head">Quests</span>
+							<div id="Quests" class="scroll listbox">
+								<table>
+									<tbody>
+									</tbody>
+								</table>
+							</div>
+
+							<div class="progress-container" id="QuestBar">
+								<div class="hint"></div>
+								<div class="bar"></div>
+							</div>
+						</div>
+
+					</div>
+
+					<div id="Kill" class="label"></div>
+
+					<div class="progress-container" id="TaskBar">
+						<div class="hint"></div>
+						<div class="bar"></div>
+					</div>
+
+				</div>
+			</main>
+		</div>
+
+		<footer class="cgpt-statusbar">
+			<div id="shell-status-text">Ready</div>
+			<div id="shell-version">v0.5.50</div>
+		</footer>
+	</div>
+	<!-- End Dock Shell -->
+</body>
+
+</html>
