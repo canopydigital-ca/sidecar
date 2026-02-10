@@ -4,6 +4,7 @@
     "": {
       "name": "sidecar-landing-sveltekit",
       "dependencies": {
+        "lottie-web": "^5.13.0",
         "lucide-svelte": "^0.400.0",
       },
       "devDependencies": {
@@ -250,6 +251,8 @@
     "lines-and-columns": ["lines-and-columns@1.2.4", "", {}, "sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg=="],
 
     "locate-character": ["locate-character@3.0.0", "", {}, "sha512-SW13ws7BjaeJ6p7Q6CO2nchbYEc3X3J6WrmTTDto7yMPqVSZTUyY5Tjbid+Ab8gLnATtygYtiDIJGQRRn2ZOiA=="],
+
+    "lottie-web": ["lottie-web@5.13.0", "", {}, "sha512-+gfBXl6sxXMPe8tKQm7qzLnUy5DUPJPKIyRHwtpCpyUEYjHYRJC/5gjUvdkuO2c3JllrPtHXH5UJJK8LRYl5yQ=="],
 
     "lucide-svelte": ["lucide-svelte@0.400.0", "", { "peerDependencies": { "svelte": "^3 || ^4 || ^5.0.0-next.42" } }, "sha512-ED2fgoELg2qrXbQnsPhb1DlwfqwYTRqFvljQcpM2LZlsj5907RkJhKAdjBAc65fn3rMT7e6ecdXtTTMd2Vp8lg=="],
 

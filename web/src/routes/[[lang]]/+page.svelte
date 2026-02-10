@@ -61,11 +61,11 @@
           class="text-sm font-medium text-zinc-400 hover:text-white transition-colors"
           >{t.nav.roadmap}</a
         >
-        <a
+        <!-- <a
           href="#testimonials"
           class="text-sm font-medium text-zinc-400 hover:text-white transition-colors"
           >{t.nav.testimonials}</a
-        >
+        > -->
 
         <a
           href="https://github.com/your-org/sidecar"
@@ -107,11 +107,11 @@
           onclick={closeMenu}
           class="text-zinc-400 hover:text-white">{t.nav.roadmap}</a
         >
-        <a
+        <!-- <a
           href="#testimonials"
           onclick={closeMenu}
           class="text-zinc-400 hover:text-white">{t.nav.testimonials}</a
-        >
+        > -->
         <a
           href="https://github.com/your-org/sidecar"
           target="_blank"
@@ -134,7 +134,7 @@
       >
         <div class="absolute inset-0 bg-zinc-900">
           <img
-            src="/hero-interface.png"
+            src="/Screenshot 2026-02-07 060040.png"
             alt="Sidecar interface preview"
             loading="lazy"
             class="w-full h-full object-cover"

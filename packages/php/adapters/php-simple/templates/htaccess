@@ -1,0 +1,43 @@
+# build/.htaccess
+# Requires: Apache 2.4+, mod_rewrite. Host must allow overrides (AllowOverride All).
+Options -Indexes
+DirectoryIndex index.php index.html
+
+<IfModule mod_negotiation.c>
+  Options -MultiViews
+</IfModule>
+
+<IfModule mod_mime.c>
+  AddType application/javascript .js .mjs
+  AddType application/wasm .wasm
+</IfModule>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Never route SvelteKit assets through PHP.
+  RewriteRule ^{{ASSETS_DIR}}/ - [L]
+  RewriteRule \.(?:js|mjs|css|map|png|jpe?g|gif|webp|svg|ico|woff2?|json|wasm)$ - [L]
+
+  # Don't rewrite real files/dirs.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Route everything else to PHP front controller.
+  RewriteRule ^ {{PHP_FILE}} [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  # Long-cache fingerprints and assets.
+  <FilesMatch "^{{ASSETS_DIR}}/.*\.(js|mjs|css|map|png|jpg|jpeg|gif|webp|svg|ico|woff2?)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+    Header set X-Content-Type-Options "nosniff"
+  </FilesMatch>
+
+  # HTML/JSON should revalidate.
+  <FilesMatch "\.(html|json)$">
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+    Header set X-Content-Type-Options "nosniff"
+  </FilesMatch>
+</IfModule>
