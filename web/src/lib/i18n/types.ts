@@ -12,6 +12,17 @@ export interface Translation {
     ctaPrimary: string;
     ctaSecondary: string;
     legalDisclaimer: string;
+    availableOnAllMajorBrowsers?: string;
+    demoBanner?: string;
+    trust?: {
+      openSource: string;
+      noAccount: string;
+      readsPageOnly: string;
+    };
+    demo?: {
+      title: string;
+      subtitle: string;
+    };
   };
   seo: {
     defaultTitle: string;
@@ -40,10 +51,32 @@ export interface Translation {
     noteLocalStorage: string;
     notePublicPreview: string;
   };
+  featuresHeader?: {
+    headline: string;
+    subhead: string;
+  };
   features: Array<{
     title: string;
     description: string;
   }>;
+  howItWorks?: {
+    headline: string;
+    subhead: string;
+    steps: Array<{
+      title: string;
+      body: string;
+      icon?: string;
+    }>;
+  };
+  macrosSection?: {
+    headline: string;
+    subhead: string;
+    items: Array<{
+      title: string;
+      body: string;
+      icon?: string;
+    }>;
+  };
   testimonials: Array<{
     name: string;
     role: string;
@@ -73,9 +106,51 @@ export interface Translation {
       }>;
     };
   };
+  roadmapSection?: {
+    headline: string;
+    subhead: string;
+    items: Array<{
+      title: string;
+      body: string;
+    }>;
+  };
+  ctaSection?: {
+    headline: string;
+    body: string;
+  };
+  stores?: {
+    chrome: {
+      ariaLabel: string;
+      availableIn: string;
+      chromeWebStore: string;
+    };
+    edge: {
+      ariaLabel: string;
+      availableOn: string;
+      microsoftEdge: string;
+    };
+    firefox: {
+      ariaLabel: string;
+      getAddon: string;
+      forFirefox: string;
+    };
+  };
   legal: {
     privacyTitle: string;
     termsTitle: string;
     effectiveDate: string;
   };
+  footer?: {
+    product: string;
+    legal: string;
+    statusOperational: string;
+  };
+  faqSection?: {
+    headline: string;
+    subhead: string;
+  };
+  faqs: Array<{
+    question: string;
+    answer: string;
+  }>;
 }

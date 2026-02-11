@@ -1,17 +1,30 @@
 import type { Translation } from './types';
+// get version from package.json
+
 
 export const en: Translation = {
   site: {
     brand: "Sidecar",
     storeTitle: "Sidecar for ChatGPT: Toolbox + Dock",
     tagline: "A toolbox + dock that upgrades ChatGPT without clutter.",
-    versionBadge: "Sidecar v2.0 is now available",
-    heroHeadline: "Supercharge your",
-    heroAccent: "Chat Experience",
-    heroBody: "Sidecar is the productivity toolbox for ChatGPT: a smart dock, wide mode, token tracking, macros, and code tools built right into your interface.",
-    ctaPrimary: "Install Sidecar",
-    ctaSecondary: "View GitHub / Source",
-    legalDisclaimer: "Not affiliated with OpenAI."
+    versionBadge: `Sidecar v${__SIDECAR_VERSION__}`,
+    heroHeadline: "A dock for ChatGPT that saves clicks.",
+    heroAccent: "",
+    heroBody: "Wide mode, prompt library, token tracking, macros, and code tools. On every chat, instantly.",
+    ctaPrimary: "Add to Chrome",
+    ctaSecondary: "View GitHub",
+    trust: {
+      openSource: "Open source",
+      noAccount: "No account required",
+      readsPageOnly: "Reads page content only"
+    },
+    demo: {
+      title: "Try it in 10 seconds.",
+      subtitle: "Hover icons to preview. Click to see the feature."
+    },
+    legalDisclaimer: "Not affiliated with OpenAI.",
+    availableOnAllMajorBrowsers: "Available on all major browsers",
+    demoBanner: "Try the live demo ->"
   },
   seo: {
     defaultTitle: "Sidecar for ChatGPT: The Ultimate Productivity Dock",
@@ -38,6 +51,10 @@ export const en: Translation = {
     noteTemplates: "templates included",
     noteLocalStorage: "local storage only",
     notePublicPreview: "public preview available"
+  },
+  featuresHeader: {
+    headline: "Power tools for power users",
+    subhead: "Everything you need to manage your AI conversations more effectively, built directly into the interface you already use."
   },
   features: [
     {
@@ -81,6 +98,53 @@ export const en: Translation = {
       description: "Deep customization of extension behavior with import/export capabilities for your settings."
     }
   ],
+  howItWorks: {
+    headline: "How it works",
+    subhead: "Three steps. Minimal drama. Your browser thanks you.",
+    steps: [
+      {
+        title: "Install from your store",
+        body: "Add Sidecar from Chrome Web Store, Edge Add-ons, or Firefox Add-ons. (Links are placeholders until you ship.)",
+        icon: "Download"
+      },
+      {
+        title: "Enable it on ChatGPT",
+        body: "Open ChatGPT and toggle Sidecar on. If it’s enabled, it’s available. No pinning ritual required.",
+        icon: "ToggleRight"
+      },
+      {
+        title: "Run macros + commands",
+        body: "Use Ctrl+K to open the command palette. Save macros, replay flows, and keep your hands on the keyboard.",
+        icon: "Command"
+      }
+    ]
+  },
+  macrosSection: {
+    headline: "Macros that actually help",
+    subhead: "A command palette + macro store designed to automate your workflow without hijacking ChatGPT’s composer.",
+    items: [
+      {
+        title: "Command Palette (Ctrl+K)",
+        body: "Type commands in Sidecar’s palette input only. No slash-command hacks in the native composer, no IME breakage.",
+        icon: "Command"
+      },
+      {
+        title: "Macros + Flow Scripts",
+        body: "Save, share, publish, and run macro automation scripts that feed into your Flow engine (flow.ts).",
+        icon: "Workflow"
+      },
+      {
+        title: "Terminal-like History",
+        body: "Up/Down cycles your recent commands like a shell. Persisted in chrome.storage.local and capped to keep it sane.",
+        icon: "History"
+      },
+      {
+        title: "Token estimates, lazily",
+        body: "Cache per thread, refresh in idle time, and avoid re-tokenizing the universe on every mutation.",
+        icon: "Gauge"
+      }
+    ]
+  },
   testimonials: [
     {
       name: "Alex M.",
@@ -145,10 +209,78 @@ export const en: Translation = {
       ]
     }
   },
+  roadmapSection: {
+    headline: "Roadmap bits (the “nice to have” pile)",
+    subhead: "A few of the bigger upgrades that fit your spec. These are landing-page bullets, not promises.",
+    items: [
+      {
+        title: "Page title cleanup",
+        body: "Strip “ChatGPT - ” from the tab title when running in the extension context."
+      },
+      {
+        title: "Popover UX",
+        body: "Popovers close on outside click and on actions inside them."
+      },
+      {
+        title: "Grab handle animation",
+        body: "Cute micro-handle that expands on hover and animates smoothly."
+      },
+      {
+        title: "Prompt recall in composer",
+        body: "Up-arrow previews recent prompts; Right-arrow inserts full prompt."
+      },
+      {
+        title: "Scroll + wide mode safeguards",
+        body: "Stop auto-scroll to bottom optionally; fix wide-mode overflow on long prompts."
+      },
+      {
+        title: "Message collapsing",
+        body: "Collapse long chats with preview + char count; auto-collapse on send over X chars."
+      },
+      {
+        title: "Your code blocks",
+        body: "Detect ``` in your messages, render styled blocks, syntax highlight, click-to-copy."
+      },
+      {
+        title: "Font scaling",
+        body: "Scale Sidecar UI without changing browser zoom."
+      }
+    ]
+  },
+  ctaSection: {
+    headline: "Ready to upgrade your workflow?",
+    body: "Build it in public, ship it fast, and let your users bully it into greatness."
+  },
+  stores: {
+    chrome: {
+      ariaLabel: "Available in the Chrome Web Store",
+      availableIn: "Available in the",
+      chromeWebStore: "Chrome Web Store"
+    },
+    edge: {
+      ariaLabel: "Available on Microsoft Edge Add-ons",
+      availableOn: "Available on",
+      microsoftEdge: "Microsoft Edge"
+    },
+    firefox: {
+      ariaLabel: "Get the Add-on for Firefox",
+      getAddon: "Get the Add-on",
+      forFirefox: "for Firefox"
+    }
+  },
   legal: {
     privacyTitle: "Privacy Policy",
     termsTitle: "Terms of Service",
     effectiveDate: "Effective date"
+  },
+  footer: {
+    product: "Product",
+    legal: "Legal",
+    statusOperational: "All systems operational"
+  },
+  faqSection: {
+    headline: "Frequently Asked Questions",
+    subhead: "Everything you need to know about Sidecar and browser extension compatibility"
   },
   faqs: [
     {
