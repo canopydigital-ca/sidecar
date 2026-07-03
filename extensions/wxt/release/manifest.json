@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-03T04:38:15.465Z",
+  "generatedAt": "2026-07-03T06:58:28.639Z",
   "entrypoints": [
     "background",
     "chatgpt-dock"
@@ -12,8 +12,8 @@
       "variant": "full",
       "version": "0.6.0",
       "file": "artifacts/sidecar-v0.6.0-chrome-mv3-full.zip",
-      "sha256": "829913e51919149d76920c9f3819eb17743e74fec2a700c32014ac55ba7b573c",
-      "size": 27418475
+      "sha256": "79a112b5ae9204e35206b4f1389ab008b921cf24579b29f170f8876bd78048a7",
+      "size": 27426065
     },
     {
       "browser": "edge",
@@ -21,8 +21,8 @@
       "variant": "full",
       "version": "0.6.0",
       "file": "artifacts/sidecar-v0.6.0-edge-mv3-full.zip",
-      "sha256": "829913e51919149d76920c9f3819eb17743e74fec2a700c32014ac55ba7b573c",
-      "size": 27418475
+      "sha256": "79a112b5ae9204e35206b4f1389ab008b921cf24579b29f170f8876bd78048a7",
+      "size": 27426065
     },
     {
       "browser": "firefox",
@@ -30,8 +30,8 @@
       "variant": "full",
       "version": "0.6.0",
       "file": "artifacts/sidecar-v0.6.0-firefox-mv2-full.zip",
-      "sha256": "318d1c7d64bc4443b718a160d6da38ff243f8033c4acc7281887e0363e774687",
-      "size": 27418487
+      "sha256": "79fc3c40331572cbed3c5129e5f603a1ba425996d45d262d44f9048f0243e90d",
+      "size": 27426077
     }
   ]
 }
