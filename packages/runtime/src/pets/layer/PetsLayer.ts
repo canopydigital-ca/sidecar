@@ -485,7 +485,10 @@ export class PetsLayer {
       // the class rule and re-runs on status-bar show/hide via handleResize().
       container.classList.add('mode-corner');
       const statusRect = this.resolveStatusBarRect();
-      const bottomInset = 20 + (statusRect ? statusRect.height : 0);
+      // Sit just above the status bar (small gap) when it's visible, else the
+      // default 20px-from-bottom corner. Keeping the gap small avoids the pet
+      // floating noticeably high above the bar.
+      const bottomInset = statusRect ? statusRect.height + 6 : 20;
       container.style.bottom = `${bottomInset}px`;
     }
   }
@@ -606,10 +609,22 @@ export class PetsLayer {
       this.observedResizeTargets.add(document.body);
     }
 
-    // Mutation Observer to ensure host persistence
+    // Mutation Observer to ensure host persistence AND to react promptly when
+    // layout landmarks (status bar, dock, overlay root) are added/removed —
+    // otherwise the pet only repositions on the next viewport/body-resize and
+    // lags visibly behind the status bar appearing.
+    const LAYOUT_LANDMARK_IDS = new Set(['cgpt-statusbar', 'cgpt-dock', 'cgpt-ext-root']);
+    const touchesLandmark = (nodes: NodeList) => {
+      for (let i = 0; i < nodes.length; i++) {
+        const el = nodes[i] as Element;
+        if (el && el.nodeType === 1 && LAYOUT_LANDMARK_IDS.has(el.id)) return true;
+      }
+      return false;
+    };
     if (!this.mutationObserver) {
       this.mutationObserver = new MutationObserver((mutations) => {
         let detached = false;
+        let layoutChanged = false;
         for (const m of mutations) {
           for (let i = 0; i < m.removedNodes.length; i++) {
             if (m.removedNodes[i] === this.host) {
@@ -617,15 +632,23 @@ export class PetsLayer {
               break;
             }
           }
-          if (detached) break;
+          if (!layoutChanged && (touchesLandmark(m.addedNodes) || touchesLandmark(m.removedNodes))) {
+            layoutChanged = true;
+          }
         }
 
         if (detached && this.host) {
           // Re-attach immediately
           document.documentElement.appendChild(this.host);
         }
+        if (layoutChanged) {
+          // Reposition now (and keep settling briefly as the landmark lays out).
+          this.schedulePlacementUpdate();
+          this.startPlacementSettle(500);
+        }
       });
       this.mutationObserver.observe(document.documentElement, { childList: true });
+      this.mutationObserver.observe(document.body, { childList: true });
     }
   }
 
