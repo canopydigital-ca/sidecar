@@ -25,7 +25,7 @@ jobs:
         working-directory: extensions/wxt
         run: bun run package:release
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v7
         with:
           name: sidecar-release
           path: |
