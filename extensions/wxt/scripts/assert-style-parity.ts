@@ -34,6 +34,19 @@ const FORBIDDEN_DOCK_LOCAL_CSS = [
   { label: 'pressed dock button visual override', pattern: /\.cgpt-btn\.pressed/is },
 ];
 
+// Real Tailwind utilities used by the popover UI (PopoverRoot.svelte) must be
+// present in the generated shadow CSS. If Tailwind ever stops scanning the
+// runtime package (e.g. the @source directive in packages/runtime/src/ui/app.css
+// is dropped), these vanish and popovers silently lose their styling/animation.
+// Escaped forms match the exact bytes Tailwind emits into the stylesheet.
+const REQUIRED_SHADOW_POPOVER_UTILITIES = [
+  { label: 'popover enter transform (scale-95)', value: 'scale-95' },
+  { label: 'popover open-state variant (data-[state=open])', value: 'data-\\[state\\=open\\]' },
+  { label: 'popover backdrop blur (backdrop-blur-xl)', value: 'backdrop-blur-xl' },
+  { label: 'popover chrome radius (rounded-2xl)', value: 'rounded-2xl' },
+  { label: 'popover resize-handle cursor (nwse-resize)', value: 'nwse-resize' },
+];
+
 run();
 
 function run() {
@@ -66,6 +79,13 @@ function run() {
 
   assert(shadowCss.includes('@layer') || shadowCss.includes('.svelte-'), 'Shadow CSS split appears empty or missing UI styles');
   assert(runtimeShadowCss.includes('#cgpt-dock'), 'Runtime shadow CSS is missing legacy dock styles');
+  for (const util of REQUIRED_SHADOW_POPOVER_UTILITIES) {
+    assert(
+      shadowCss.includes(util.value),
+      `Runtime shadow CSS is missing popover utility — ${util.label}: "${util.value}". ` +
+        'Tailwind may have stopped scanning packages/runtime (check @source in packages/runtime/src/ui/app.css).',
+    );
+  }
   for (const forbidden of FORBIDDEN_DOCUMENT_CSS) {
     assert(!forbidden.pattern.test(runtimeDocumentCss), `Runtime document CSS contains ${forbidden.label}`);
   }

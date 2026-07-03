@@ -1,4 +1,5 @@
 import type { ChatGptHostAdapter, ComposerAnchor, SidebarAction } from "../../runtime/src/core/host";
+import { isSidecarDebugEnabled } from "../../runtime/src/dev/instrumentation";
 import { CHATGPT_SELECTORS } from "./selectors";
 
 function queryFirstBySelectors(
@@ -139,57 +140,209 @@ function scoreComposerSurface(candidate: Element, editorRect: DOMRect): number {
   return rect.width - tooHighPenalty - tallSurfacePenalty;
 }
 
-function findComposerInputShell(): Element | null {
+/** How the composer anchor was decided; logged when anchor debugging is on. */
+type ComposerAnchorMethod =
+  | "structural:composer-form"
+  | "heuristic:bounded"
+  | "heuristic:unbounded"
+  | "fallback:editor-parent"
+  | "fallback:composer-form-query"
+  | "fallback:thread-bottom";
+
+type ComposerShellResolution = {
+  element: Element;
+  method: ComposerAnchorMethod;
+  /** Structural element that terminated the ancestor walk, if any. */
+  boundary: Element | null;
+};
+
+function matchesAny(el: Element, selectors: readonly string[]): boolean {
+  for (const selector of selectors) {
+    try {
+      if (el.matches(selector)) return true;
+    } catch {
+      // Selector not supported by this engine; try the next one.
+    }
+  }
+  return false;
+}
+
+function hasUsableRect(el: Element): boolean {
+  const rect = el.getBoundingClientRect();
+  return rect.width > 0 && rect.height > 0;
+}
+
+/**
+ * Resolves the composer "input shell" the dock anchors to.
+ *
+ * Decision order (structural boundary first, pure heuristics last):
+ * 1. The ancestor walk from the editor stops deterministically AT the first
+ *    structural boundary: form.group\/composer (or its fallback wrappers) or
+ *    #thread-bottom-container. Nothing at or above the boundary is ever a
+ *    scored candidate, so the rect-threshold heuristics can no longer select
+ *    a wrong large ancestor (disclaimer/suggestion containers) on ChatGPT DOM
+ *    variants — the historical dock-misplacement failure mode.
+ * 2. Within the bounded region the existing scored heuristics choose the
+ *    visual input shell (the surface hugging the editor), preserving the
+ *    established placement contract (dock sits just above the rounded input
+ *    box, not above pill/attachment rows inside the form).
+ * 3. If no candidate below the boundary passes the filters, the composer form
+ *    itself is the deterministic structural anchor.
+ * 4. Only when no structural boundary exists in the ancestor chain (unknown
+ *    DOM variant) do the legacy heuristics run unbounded, as before.
+ */
+function resolveComposerInputShell(): ComposerShellResolution | null {
   const editor = findComposerEditor();
   if (!editor) return null;
 
   const editorRect = editor.getBoundingClientRect();
   if (editorRect.width <= 0 || editorRect.height <= 0) {
-    return editor.parentElement ?? editor;
+    return { element: editor.parentElement ?? editor, method: "fallback:editor-parent", boundary: null };
   }
 
   const candidates: Element[] = [];
+  let boundary: Element | null = null;
+  let bounded = false;
   let current = editor.parentElement;
   let depth = 0;
 
   while (current && depth < 12) {
     if (current === document.body || current === document.documentElement) break;
+
+    if (matchesAny(current, CHATGPT_SELECTORS.composerForm)) {
+      // Structural boundary: stop the walk here. The form itself is kept as a
+      // deterministic anchor of last resort, but inner candidates win so the
+      // dock hugs the input shell rather than pill rows inside the form.
+      bounded = true;
+      if (hasUsableRect(current)) boundary = current;
+      break;
+    }
+
+    if (matchesAny(current, CHATGPT_SELECTORS.threadBottomContainer)) {
+      // Hard boundary: everything at or above this is not the input shell.
+      bounded = true;
+      break;
+    }
+
     if (isUsefulComposerSurface(current, editorRect)) {
       candidates.push(current);
     }
+
     current = current.parentElement;
     depth += 1;
   }
 
-  if (candidates.length === 0) {
-    return editor.parentElement ?? editor;
+  if (candidates.length > 0) {
+    candidates.sort((a, b) => {
+      const scoreDiff = scoreComposerSurface(b, editorRect) - scoreComposerSurface(a, editorRect);
+      if (Math.abs(scoreDiff) > 0.5) return scoreDiff;
+
+      const ar = a.getBoundingClientRect();
+      const br = b.getBoundingClientRect();
+      return Math.max(0, editorRect.top - ar.top) - Math.max(0, editorRect.top - br.top);
+    });
+
+    return {
+      element: candidates[0],
+      method: bounded ? "heuristic:bounded" : "heuristic:unbounded",
+      boundary,
+    };
   }
 
-  candidates.sort((a, b) => {
-    const scoreDiff = scoreComposerSurface(b, editorRect) - scoreComposerSurface(a, editorRect);
-    if (Math.abs(scoreDiff) > 0.5) return scoreDiff;
+  if (boundary) {
+    return { element: boundary, method: "structural:composer-form", boundary };
+  }
 
-    const ar = a.getBoundingClientRect();
-    const br = b.getBoundingClientRect();
-    return Math.max(0, editorRect.top - ar.top) - Math.max(0, editorRect.top - br.top);
+  // The walk can be cut short by a false thread-bottom boundary (e.g. a
+  // `.composer`-classed wrapper nested inside the real form). `closest` still
+  // sees the full ancestor chain, so recover the structural form anchor
+  // before degrading to the editor's parent.
+  if (bounded) {
+    for (const selector of CHATGPT_SELECTORS.composerForm) {
+      let form: Element | null = null;
+      try {
+        form = editor.closest(selector);
+      } catch {
+        continue;
+      }
+      if (form && hasUsableRect(form)) {
+        return { element: form, method: "structural:composer-form", boundary: form };
+      }
+    }
+  }
+
+  return { element: editor.parentElement ?? editor, method: "fallback:editor-parent", boundary: null };
+}
+
+// --- anchor decision debug logging (opt-in, see dev/instrumentation.ts) ---
+
+let _lastLoggedAnchor: Element | null = null;
+let _lastLoggedMethod: ComposerAnchorMethod | null = null;
+
+function describeElement(el: Element): string {
+  let out = el.tagName.toLowerCase();
+  if (el.id) out += `#${el.id}`;
+  const classes = Array.from(el.classList).slice(0, 3);
+  if (classes.length > 0) out += `.${classes.join(".")}`;
+  return out;
+}
+
+function describeElementPath(el: Element, maxSegments = 5): string {
+  const segments: string[] = [];
+  let node: Element | null = el;
+  while (node && node !== document.documentElement && segments.length < maxSegments) {
+    segments.unshift(describeElement(node));
+    node = node.parentElement;
+  }
+  return segments.join(" > ");
+}
+
+/**
+ * Logs which composer anchor was chosen, how, its selector path and rect.
+ * Gated behind the sidecar debug localStorage flag (cgptSidecarDebug /
+ * cgptSidecarDebugAnchor) and de-duplicated: only logs when the chosen
+ * element or decision method changes, so live QA gets one line per decision
+ * instead of per-frame noise.
+ */
+function logAnchorDecision(anchor: Element, method: ComposerAnchorMethod, boundary: Element | null): void {
+  if (!isSidecarDebugEnabled()) return;
+  if (anchor === _lastLoggedAnchor && method === _lastLoggedMethod) return;
+  _lastLoggedAnchor = anchor;
+  _lastLoggedMethod = method;
+
+  const rect = anchor.getBoundingClientRect();
+  console.info("[SidecarAnchor] composer anchor selected", {
+    method,
+    path: describeElementPath(anchor),
+    boundary: boundary ? describeElement(boundary) : null,
+    rect: {
+      top: Math.round(rect.top),
+      left: Math.round(rect.left),
+      width: Math.round(rect.width),
+      height: Math.round(rect.height),
+    },
+    element: anchor,
   });
-
-  return candidates[0] ?? null;
 }
 
 function findComposerAnchor(): ComposerAnchor | null {
-  let target = findComposerInputShell();
+  const resolution = resolveComposerInputShell();
+  let target: Element | null = resolution?.element ?? null;
+  let method: ComposerAnchorMethod = resolution?.method ?? "fallback:composer-form-query";
 
   if (!target) {
     target = queryFirstBySelectors(CHATGPT_SELECTORS.composerForm);
+    method = "fallback:composer-form-query";
   }
 
   if (target?.parentElement) {
+    logAnchorDecision(target, method, resolution?.boundary ?? null);
     return { anchor: target, parent: target.parentElement };
   }
 
   const bottom = queryFirstBySelectors(CHATGPT_SELECTORS.threadBottomContainer);
   if (bottom?.parentElement) {
+    logAnchorDecision(bottom, "fallback:thread-bottom", null);
     return { anchor: bottom, parent: bottom.parentElement };
   }
 

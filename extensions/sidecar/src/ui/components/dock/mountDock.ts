@@ -68,11 +68,23 @@ export function ensureDockMount(target: HTMLElement, initialProps: DockProps): D
       color: var(--text-primary, currentColor);
     }
     .cgpt-btn {
+      background: transparent;
+      border: none;
       cursor: pointer;
+      padding: 6px;
+      border-radius: 4px;
       color: currentColor;
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: background 0.1s, color 0.1s;
+    }
+    .cgpt-btn:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    .cgpt-btn.pressed {
+      color: #10a37f;
+      background: rgba(16,163,127,0.1);
     }
     * {
       box-sizing: border-box;

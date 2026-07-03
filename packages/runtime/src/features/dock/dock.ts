@@ -5,6 +5,7 @@ import { peekSettings, subscribeSettings, updateSettings } from "../settings/sto
 import { GlobalSettings, DEFAULT_SETTINGS } from "../settings/schema";
 import { log } from "../../core/log";
 import { getDebugEnabled } from "../../core/debugFlag";
+import { measureInteraction } from "../../dev/instrumentation";
 import { getProgressQuestService } from "../../pq/service";
 import { startPQProgressFeed } from "../../pq/progressQuestState";
 import { startPQStateFeed, getPQProgress01, type PQState } from "../../pq/progressQuestState";
@@ -99,6 +100,10 @@ function ensureDockStage(): HTMLElement | null {
 }
 
 function positionDock(tracker?: DockContext["trackSelectorPerformance"]): boolean {
+  return measureInteraction("dock:positionDock", () => positionDockInternal(tracker));
+}
+
+function positionDockInternal(tracker?: DockContext["trackSelectorPerformance"]): boolean {
   const dock = _dockHost ?? ensureDockHost();
   if (!dock) return false;
   const spot = findComposerAnchor(tracker);
@@ -107,6 +112,11 @@ function positionDock(tracker?: DockContext["trackSelectorPerformance"]): boolea
     return false;
   }
   const anchorEl = spot.anchor as Element;
+
+  // --- Read phase: batch every layout read BEFORE any style write so the
+  // steady-state path performs no forced synchronous reflow (the old
+  // write -> scrollWidth read -> write sequence thrashed layout on every
+  // call and re-set width/left in the same frame).
   const rect = anchorEl.getBoundingClientRect();
   if (!rect || (rect.width === 0 && rect.height === 0)) {
     dock.style.display = "none";
@@ -114,17 +124,36 @@ function positionDock(tracker?: DockContext["trackSelectorPerformance"]): boolea
   }
   const viewportW = Math.max(0, window.innerWidth || document.documentElement.clientWidth || 0);
   const viewportH = Math.max(0, window.innerHeight || document.documentElement.clientHeight || 0);
+  const wasHidden = dock.style.display === "none" || !dock.style.display;
+  const committedWidth = Number.parseFloat(dock.style.width);
+  const measuredContentWidth = wasHidden ? 0 : getDockContentWidth(dock);
 
   const desiredWidth = Math.max(0, rect.width - DOCK_INSET * 2);
   const maxWidth = Math.max(0, viewportW - DOCK_INSET * 2);
-  let width = Math.min(desiredWidth, maxWidth);
+  const baseWidth = Math.min(desiredWidth, maxWidth);
+  let width = baseWidth;
 
-  let desiredLeft = rect.left + DOCK_INSET;
-  let maxLeft = Math.max(DOCK_INSET, viewportW - DOCK_INSET - width);
-  let left = Math.min(Math.max(DOCK_INSET, desiredLeft), maxLeft);
+  // Widen-to-fit (same contract as before): if the dock content overflows the
+  // anchor-derived width, grow up to the viewport clamp and recenter over the
+  // anchor. The pre-write measurement is exact whenever the target width
+  // matches the currently committed width (the common case across frames).
+  const preMeasureIsExact =
+    !wasHidden && Number.isFinite(committedWidth) && Math.abs(committedWidth - baseWidth) < 0.5;
+  if (preMeasureIsExact && measuredContentWidth > width && maxWidth > width) {
+    width = Math.min(measuredContentWidth, maxWidth);
+  }
+
+  const desiredLeft =
+    width > baseWidth ? rect.left + rect.width / 2 - width / 2 : rect.left + DOCK_INSET;
+  const maxLeft = Math.max(DOCK_INSET, viewportW - DOCK_INSET - width);
+  const left = Math.min(Math.max(DOCK_INSET, desiredLeft), maxLeft);
 
   const top = rect.top - DOCK_GAP;
 
+  // --- Write phase: apply the fully computed position in one batch.
+  // Positioning contract unchanged: top - DOCK_GAP with translateY(-100%),
+  // flip below the anchor when the dock would leave the viewport, and
+  // viewport clamps on width/left.
   if (viewportH > 0 && top < 0) {
     dock.style.top = `${Math.max(DOCK_GAP, rect.bottom + DOCK_GAP)}px`;
     dock.style.transform = "translateY(0)";
@@ -138,14 +167,19 @@ function positionDock(tracker?: DockContext["trackSelectorPerformance"]): boolea
   dock.style.left = `${left}px`;
   dock.style.right = "auto";
 
-  const contentWidth = getDockContentWidth(dock);
-  if (contentWidth > width && maxWidth > width) {
-    width = Math.min(contentWidth, maxWidth);
-    desiredLeft = rect.left + rect.width / 2 - width / 2;
-    maxLeft = Math.max(DOCK_INSET, viewportW - DOCK_INSET - width);
-    left = Math.min(Math.max(DOCK_INSET, desiredLeft), maxLeft);
-    dock.style.width = `${width}px`;
-    dock.style.left = `${left}px`;
+  // --- Correction pass: only when the pre-write measurement could not be
+  // trusted (dock was hidden, or the target width just changed). This forces
+  // one reflow, but still commits before the browser paints, so no
+  // intermediate position is ever visible; the hot path above skips it.
+  if (!preMeasureIsExact) {
+    const contentWidth = getDockContentWidth(dock);
+    if (contentWidth > width && maxWidth > width) {
+      width = Math.min(contentWidth, maxWidth);
+      const centeredLeft = rect.left + rect.width / 2 - width / 2;
+      const clampedMaxLeft = Math.max(DOCK_INSET, viewportW - DOCK_INSET - width);
+      dock.style.width = `${width}px`;
+      dock.style.left = `${Math.min(Math.max(DOCK_INSET, centeredLeft), clampedMaxLeft)}px`;
+    }
   }
 
   return true;

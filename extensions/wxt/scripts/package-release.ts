@@ -13,7 +13,11 @@ type Manifest = {
   host_permissions?: string[];
   content_scripts?: Array<{ matches?: string[]; js?: string[]; css?: string[] }>;
   web_accessible_resources?: Array<string | { resources?: string[]; matches?: string[] }>;
+  background?: { service_worker?: string; scripts?: string[]; type?: string };
+  browser_specific_settings?: { gecko?: { id?: string; strict_min_version?: string } };
 };
+
+const MANUAL_DOCK_CSS = 'content-scripts/chatgpt-dock.css';
 
 const BROWSERS: BrowserTarget[] = ['chrome', 'edge', 'firefox'];
 const SELECTED_ENTRYPOINTS = ['background', 'chatgpt-dock'];
@@ -48,6 +52,7 @@ function run() {
     assert(existsSync(manifestPath), `Missing manifest for ${browser}: ${manifestPath}`);
     const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as Manifest;
     validateManifest(browser, manifest, packageJson.version);
+    validateOutputContents(browser, outDir);
 
     if (buildOnly) {
       continue;
@@ -144,14 +149,85 @@ function validateManifest(browser: BrowserTarget, manifest: Manifest, expectedVe
 
   const dockScript = (manifest.content_scripts ?? []).find((script) => (script.js ?? []).some((file) => file.includes('chatgpt-dock.js')));
   assert(dockScript, `${browser} manifest missing chatgpt-dock content script`);
-  assert(
-    !(dockScript.css ?? []).some((file) => file.includes('chatgpt-dock.css')),
-    `${browser} manifest injects chatgpt-dock.css into page scope`,
-  );
-  assert(
-    serialized.includes('content-scripts/chatgpt-dock.css'),
-    `${browser} manifest missing web-accessible manual CSS resource`,
-  );
+
+  // The manual CSS path is the only sanctioned one: no content_scripts entry may
+  // inject chatgpt-dock.css into the ChatGPT page document (Tailwind preflight leak).
+  for (const script of manifest.content_scripts ?? []) {
+    assert(
+      !(script.css ?? []).some((file) => file.includes('chatgpt-dock.css')),
+      `${browser} manifest injects chatgpt-dock.css into page scope: ${JSON.stringify(script.css ?? [])}`,
+    );
+  }
+
+  // Airtight WAR check: inspect the actual web_accessible_resources structure
+  // (per manifest version) rather than substring-matching the whole serialized
+  // manifest — a stale manifest with the CSS in content_scripts (and absent from
+  // WAR) must NOT satisfy this assertion.
+  if (browser === 'firefox') {
+    // MV2: flat string array of resources.
+    const flatWar = (manifest.web_accessible_resources ?? []).filter(
+      (entry): entry is string => typeof entry === 'string',
+    );
+    assert(
+      manifest.web_accessible_resources?.every((entry) => typeof entry === 'string') ?? true,
+      `${browser} (MV2) web_accessible_resources must be a flat string array, got objects`,
+    );
+    assert(
+      flatWar.includes(MANUAL_DOCK_CSS),
+      `${browser} (MV2) web_accessible_resources missing manual CSS resource: ${JSON.stringify(flatWar)}`,
+    );
+
+    // MV2 background must be scripts-based, not a service worker.
+    assert(
+      Array.isArray(manifest.background?.scripts) && manifest.background.scripts.length > 0,
+      `${browser} (MV2) background must use scripts[], got ${JSON.stringify(manifest.background ?? null)}`,
+    );
+    assert(
+      !manifest.background?.service_worker,
+      `${browser} (MV2) background must not declare a service_worker`,
+    );
+
+    // AMO submission blocker: a stable gecko add-on id is required.
+    assert(
+      typeof manifest.browser_specific_settings?.gecko?.id === 'string' &&
+        manifest.browser_specific_settings.gecko.id.length > 0,
+      `${browser} manifest missing browser_specific_settings.gecko.id (AMO rejects without it)`,
+    );
+  } else {
+    // MV3: WAR entries are objects with a resources[] array.
+    const warObjects = (manifest.web_accessible_resources ?? []).filter(
+      (entry): entry is { resources?: string[]; matches?: string[] } => typeof entry === 'object' && entry !== null,
+    );
+    assert(
+      manifest.web_accessible_resources?.every((entry) => typeof entry === 'object') ?? false,
+      `${browser} (MV3) web_accessible_resources must use object entries, got strings`,
+    );
+    assert(
+      warObjects.some((entry) => (entry.resources ?? []).includes(MANUAL_DOCK_CSS)),
+      `${browser} (MV3) web_accessible_resources missing manual CSS resource`,
+    );
+
+    // MV3 background must be a service worker, not scripts[].
+    assert(
+      typeof manifest.background?.service_worker === 'string',
+      `${browser} (MV3) background must declare a service_worker`,
+    );
+  }
+}
+
+function validateOutputContents(browser: BrowserTarget, outDir: string) {
+  const files = listFiles(outDir).map((file) => toZipPath(file, outDir));
+  for (const zipPath of files) {
+    const base = zipPath.split('/').pop() ?? zipPath;
+    assert(
+      !base.startsWith('.env'),
+      `${browser} build output contains an env file that would be zipped: ${zipPath}`,
+    );
+    assert(
+      !zipPath.includes('demo-dock'),
+      `${browser} build output contains a demo-dock artifact that would be zipped: ${zipPath}`,
+    );
+  }
 }
 
 function writeZipFromDirectory(sourceDir: string, targetFile: string) {
