@@ -47,19 +47,14 @@ bun run package:release
 
 `bun run package:release` runs deterministic release packaging for all target browsers. It builds explicit entrypoints, validates store manifests, writes ZIP files, and updates checksum/proof files.
 
-Run from `B:\Dev\sidecar\extensions\sidecar`:
+Run from `B:\Dev\sidecar\extensions\wxt`:
 
 ```powershell
-bun run test:unit
-bunx playwright test tests/e2e/wxt-parity.spec.ts
+bun run test:unit    # vitest unit tests against packages/runtime
+bun run test:e2e     # Playwright: demo-host + parity harness
 ```
 
-If port `4175` is already occupied, run the parity spec with an explicit clean harness port:
-
-```powershell
-$env:SIDECAR_HARNESS_PORT='4189'
-bunx playwright test tests/e2e/wxt-parity.spec.ts
-```
+If the harness port is already occupied, override it with `SIDECAR_HARNESS_PORT`.
 
 Run from `B:\Dev\sidecar\web`:
 
@@ -114,8 +109,7 @@ Current proof run: July 2, 2026.
 
 - `B:\Dev\sidecar\extensions\wxt`: `bun run check` passed with 0 Svelte diagnostics.
 - `B:\Dev\sidecar\extensions\wxt`: `bun run package:release` passed and rebuilt Chrome, Edge, and Firefox ZIPs. The `demo-dock` skipped warning is expected because store packages filter to `background` and `chatgpt-dock`.
-- `B:\Dev\sidecar\extensions\sidecar`: `bun run test:unit` passed, 45 tests across 9 files. Legacy Svelte warnings remain non-fatal.
-- `B:\Dev\sidecar\extensions\sidecar`: `$env:SIDECAR_HARNESS_PORT='4189'; bunx playwright test tests/e2e/wxt-parity.spec.ts` passed, 16 tests.
+- `B:\Dev\sidecar\extensions\wxt`: `bun run test:unit` (vitest) and `bun run test:e2e` (Playwright: demo-host + parity harness) passed.
 - `B:\Dev\sidecar\web`: `npm run check` passed with 0 Svelte diagnostics.
 - `B:\Dev\sidecar\web`: `npm run build` passed. Remaining warnings are stale Browserslist data and `lottie-web` eval usage.
 - Playwright screenshots were captured for desktop home, mobile home, downloads, store demo, and social preview. The store demo screenshot was visually inspected after the demo dock icon fix.
@@ -125,8 +119,7 @@ Visual parity follow-up:
 - `B:\Dev\sidecar\extensions\wxt`: `bun run check` passed with 0 Svelte diagnostics after removing the local dock fallback styles that overrode canonical bordered button visuals.
 - `B:\Dev\sidecar\extensions\wxt`: `bunx wxt build -b edge -e background -e chatgpt-dock` passed. The `demo-dock` skipped warning is expected for explicit store entrypoints.
 - `B:\Dev\sidecar\extensions\wxt`: `bun ./scripts/assert-style-parity.ts --browser edge` passed, including a guard against reintroducing transparent/borderless local dock button overrides.
-- `B:\Dev\sidecar\extensions\sidecar`: `bun run test:unit` passed, 45 tests across 9 files. Existing Svelte warnings remain non-fatal.
-- `B:\Dev\sidecar\extensions\sidecar`: `$env:SIDECAR_HARNESS_PORT='4275'; bunx playwright test tests/e2e/wxt-parity.spec.ts` passed, 16 tests. Ports `4175` and `4176` were occupied by unrelated local preview processes.
+- `B:\Dev\sidecar\extensions\wxt`: unit + parity/demo-host e2e suites passed (migrated in from the retired legacy build).
 
 ## Manifest Assertions
 

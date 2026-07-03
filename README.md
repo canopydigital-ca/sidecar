@@ -8,9 +8,8 @@ Canonical site: <https://sidecar.canopydigital.ca>
 
 | Path | What it is |
 |---|---|
-| `extensions/wxt` | **The active extension** — WXT-native build (Chrome MV3, Edge MV3, Firefox MV2). Install and develop here. |
-| `extensions/sidecar` | Frozen legacy single-browser build, kept as the canonical visual-parity reference and test harness. Do not develop here. |
-| `packages/runtime` | Shared extension runtime (dock, popovers, features, UI) extracted from the legacy source. |
+| `extensions/wxt` | **The active extension** — WXT-native build (Chrome MV3, Edge MV3, Firefox MV2). Install, develop, and test here. |
+| `packages/runtime` | Shared extension runtime (dock, popovers, features, UI) consumed by the WXT build. |
 | `packages/host-chatgpt` | ChatGPT host adapter: selector catalog, composer-anchor resolution, DOM discovery. |
 | `packages/ui`, `packages/addons`, `packages/icons` | Shared UI surface, addon seams (Pets/ProgressQuest), icon data. |
 | `packages/php` | Static-PHP SvelteKit adapter used by the website build. |
@@ -27,11 +26,8 @@ bun install
 bun run dev          # WXT manual-runner dev flow (see extensions/wxt/README.md)
 bun run check        # svelte-check
 bun run package:release  # build + validate + zip Chrome/Edge/Firefox artifacts
-
-# Legacy parity tests
-cd extensions/sidecar
-bun run test:unit
-bunx playwright test tests/e2e/wxt-parity.spec.ts
+bun run test:unit        # vitest unit tests (against packages/runtime)
+bun run test:e2e         # Playwright: demo-host + parity harness
 
 # Website (npm)
 cd web

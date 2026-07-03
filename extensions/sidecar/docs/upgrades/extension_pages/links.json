@@ -1,9 +1,0 @@
-{
-  "site": "https://sidecar.canopydigital.ca/",
-  "github": "__GITHUB_URL__",
-  "chrome_store_core": "__CHROME_STORE_CORE_URL__",
-  "chrome_store_fun": "__CHROME_STORE_FUN_URL__",
-  "edge_store_core": "__EDGE_STORE_CORE_URL__",
-  "edge_store_fun": "__EDGE_STORE_FUN_URL__",
-  "support_email": "support@canopydigital.ca"
-}
