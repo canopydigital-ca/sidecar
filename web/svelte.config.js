@@ -1,9 +1,13 @@
 import adapter from '../packages/php/adapters/php-simple/index.js';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import { resolve } from 'node:path';
 
 const config = {
   preprocess: vitePreprocess(),
   kit: {
+    alias: {
+      '@icons': resolve('../packages/icons')
+    },
     adapter: adapter({
       out: 'build',     // upload contents of this folder to site root
       assets: '_app',

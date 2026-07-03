@@ -1,0 +1,37 @@
+{
+  "generatedAt": "2026-07-02T23:43:43.011Z",
+  "entrypoints": [
+    "background",
+    "chatgpt-dock"
+  ],
+  "variant": "full",
+  "artifacts": [
+    {
+      "browser": "chrome",
+      "manifestVersion": 3,
+      "variant": "full",
+      "version": "0.6.0",
+      "file": "artifacts/sidecar-v0.6.0-chrome-mv3-full.zip",
+      "sha256": "4cf9db36839a912b2d2710022a1ecf192e8ea89ff8db995541cfdcb965f23f2d",
+      "size": 27322872
+    },
+    {
+      "browser": "edge",
+      "manifestVersion": 3,
+      "variant": "full",
+      "version": "0.6.0",
+      "file": "artifacts/sidecar-v0.6.0-edge-mv3-full.zip",
+      "sha256": "4cf9db36839a912b2d2710022a1ecf192e8ea89ff8db995541cfdcb965f23f2d",
+      "size": 27322872
+    },
+    {
+      "browser": "firefox",
+      "manifestVersion": 2,
+      "variant": "full",
+      "version": "0.6.0",
+      "file": "artifacts/sidecar-v0.6.0-firefox-mv2-full.zip",
+      "sha256": "28a5dea5d3d0ba086ae5acaca50cddb295b357d197dc145ce033c7837eb083e3",
+      "size": 27322783
+    }
+  ]
+}

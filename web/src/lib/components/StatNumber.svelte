@@ -27,7 +27,7 @@
   }
 </script>
 
-<div class="text-center reveal" use:inview oninview={start}>
+<div class="text-center reveal" use:inview={{ onEnter: start }}>
   <div class="text-3xl md:text-4xl font-bold text-white mb-2 tabular-nums flex items-baseline justify-center gap-0.5">
     <RollingNumber value={currentValue} decimals={d()} duration={800} />
     {#if suffix}<span>{suffix}</span>{/if}

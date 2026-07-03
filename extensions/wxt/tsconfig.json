@@ -1,0 +1,22 @@
+{
+  "extends": "./.wxt/tsconfig.json",
+  "compilerOptions": {
+    "useDefineForClassFields": true,
+    "types": ["chrome"],
+    "paths": {
+      "@icons/*": ["../../packages/icons/*"],
+      "@sidecar/runtime": ["../../packages/runtime/src"],
+      "@sidecar/runtime/*": ["../../packages/runtime/src/*"],
+      "@sidecar/runtime-root": ["../../packages/runtime"],
+      "@sidecar/runtime-root/*": ["../../packages/runtime/*"],
+      "@sidecar/ui": ["../../packages/ui/src"],
+      "@sidecar/ui/*": ["../../packages/ui/src/*"],
+      "@sidecar/host-chatgpt": ["../../packages/host-chatgpt/src"],
+      "@sidecar/host-chatgpt/*": ["../../packages/host-chatgpt/src/*"],
+      "@sidecar/addons/pets": ["../../packages/addons/pets/src"],
+      "@sidecar/addons/pets/*": ["../../packages/addons/pets/src/*"],
+      "@sidecar/addons/progressquest": ["../../packages/addons/progressquest/src"],
+      "@sidecar/addons/progressquest/*": ["../../packages/addons/progressquest/src/*"]
+    }
+  }
+}

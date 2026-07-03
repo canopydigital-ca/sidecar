@@ -1,22 +1,8 @@
-export const defaultLocale = 'en-ca';
+export const defaultLocale = 'en';
 
 export const locales = {
-	'en-ca': 'English (Canada)',
-	fr: 'Français',
-	es: 'Español',
-	da: 'Dansk',
-	hi: 'हिन्दी',
-	id: 'Bahasa Indonesia',
-	it: 'Italiano',
-	ja: '日本語',
-	ko: '한국어',
-	ku: 'Kurdî',
-	nl: 'Nederlands',
-	pt: 'Português',
-	ro: 'Română',
-	ru: 'Русский',
-	tr: 'Türkçe',
-	uk: 'Українська'
+	en: 'English',
+	es: 'Español'
 } as const;
 
 export type Locale = keyof typeof locales;

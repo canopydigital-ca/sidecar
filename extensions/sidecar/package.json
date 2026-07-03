@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "chatgpt-dock",
   "version": "0.6.0",
   "module": "index.ts",
@@ -47,4 +47,3 @@
     "typescript": "^5.0.0"
   }
 }
-

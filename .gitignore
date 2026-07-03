@@ -1,2 +1,29 @@
 dist
 node_modules
+
+# Local secrets and generated environment files
+.env
+.env.*
+!.env.example
+
+# WXT generated output and release artifacts
+extensions/wxt/.output/
+extensions/wxt/.wxt/
+extensions/wxt/node_modules/
+extensions/wxt/release/artifacts/
+
+# Legacy extension generated output
+extensions/sidecar/dist/
+extensions/sidecar/.pw-tmp/
+extensions/sidecar/test-results/
+
+# SvelteKit website generated output
+web/build/
+web/.svelte-kit/
+web/node_modules/
+
+# Deferred experimental track (bak junk, merged later as a WXT addon)
+pixelagents/
+
+# Generated Playwright screenshots (regenerated per release)
+output/

@@ -25,15 +25,17 @@
           >
             <Twitter class="w-5 h-5" />
           </a>
-          <a
-            href={site.githubUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-400 hover:bg-emerald-500 hover:text-white transition-all"
-            aria-label="GitHub"
-          >
-            <Github class="w-5 h-5" />
-          </a>
+          {#if site.githubUrl}
+            <a
+              href={site.githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-400 hover:bg-emerald-500 hover:text-white transition-all"
+              aria-label="GitHub"
+            >
+              <Github class="w-5 h-5" />
+            </a>
+          {/if}
         </div>
       </div>
 
@@ -56,17 +58,19 @@
               >Roadmap</a
             >
           </li>
-          <li>
-            <a
-              href={site.githubUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 hover:text-emerald-400 transition-colors"
-            >
-              <Github class="w-4 h-4" />
-              Source
-            </a>
-          </li>
+          {#if site.githubUrl}
+            <li>
+              <a
+                href={site.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 hover:text-emerald-400 transition-colors"
+              >
+                <Github class="w-4 h-4" />
+                Source
+              </a>
+            </li>
+          {/if}
         </ul>
       </div>
 

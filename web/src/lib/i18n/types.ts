@@ -95,6 +95,8 @@ export interface Translation {
     downloads: {
       title: string;
       description: string;
+      version?: string;
+      baseUrl?: string;
       totalSize: string;
       download: string;
       modules: Array<{

@@ -4,12 +4,14 @@
   import StoreButtons from '$lib/components/store-buttons/StoreButtons.svelte';
   import HeroFieldBackground from '$lib/components/HeroFieldBackground.svelte';
   import type { Translation } from '$lib/i18n/types';
+  import site from '$lib/content/site.json';
 
   let { t } = $props<{ t: Translation['site'] }>();
 
   function openSource() {
+    if (!site.githubUrl) return;
     window.open(
-      'https://github.com/your-org/sidecar',
+      site.githubUrl,
       '_blank',
       'noopener,noreferrer'
     );
@@ -55,10 +57,12 @@
         <button
           type="button"
           onclick={openSource}
+          disabled={!site.githubUrl}
+          aria-disabled={!site.githubUrl}
           class="w-full sm:w-auto px-8 py-4 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2 border border-zinc-700"
         >
           <Github class="w-5 h-5" />
-          {t.ctaSecondary}
+          {site.githubUrl ? t.ctaSecondary : 'Source pending'}
           <ArrowRight class="w-5 h-5" />
         </button>
       </div>

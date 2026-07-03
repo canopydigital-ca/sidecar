@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en" data-sidecar-demo="1">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sidecar Demo</title>
+  <style>
+    :root{color-scheme:dark;font-family:"Segoe UI",system-ui,sans-serif;--bg:#0b1020;--panel:#121a30;--line:rgba(255,255,255,.1);--text:#eff4ff;--muted:#93a2c8;--accent:#69d0ff;--accent2:#8bffcf}
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(circle at top left,rgba(105,208,255,.14),transparent 28%),linear-gradient(180deg,#0a1020 0%,#070b16 100%);color:var(--text)}
+    body{min-height:100vh;padding:12px}button,input{font:inherit}button{cursor:pointer}
+    .page{min-height:calc(100vh - 24px);display:grid;grid-template-columns:56px auto 1fr;border:1px solid var(--line);border-radius:24px;overflow:hidden;background:rgba(11,16,32,.9)}
+    .launcher,.shell,.app{min-height:0}.launcher{display:grid;place-items:start center;padding-top:12px;border-right:1px solid var(--line);background:rgba(9,14,28,.75)}
+    .icon,.ghost,.primary{min-height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--text)}
+    .icon{width:38px}.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#07111f;font-weight:700}
+    #stage-slideover-sidebar{width:280px;overflow:hidden;border-right:1px solid var(--line);background:linear-gradient(180deg,rgba(17,24,45,.96),rgba(10,15,29,.98));transition:width .18s ease,opacity .18s ease}
+    .shell{height:100%;display:grid;grid-template-rows:auto auto 1fr auto}.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+    .brand{display:grid;gap:3px}.brand strong{font-size:14px;letter-spacing:.04em;text-transform:uppercase}.muted,.meta{color:var(--muted);font-size:12px}
+    .new{margin:16px;width:calc(100% - 32px)}nav[aria-label="Chat history"]{min-height:0;overflow:auto;padding:8px 12px 16px}#history-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+    #history-list li{position:relative}#history-list a{display:grid;gap:4px;padding:12px 42px 12px 14px;border-radius:14px;color:inherit;text-decoration:none;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05)}
+    #history-list a[aria-current="page"]{background:rgba(105,208,255,.16);border-color:rgba(105,208,255,.3)}.opts{position:absolute;top:8px;right:8px}.opts button{width:28px;height:28px;border-radius:999px;background:rgba(255,255,255,.06);color:var(--text);border:0}
+    .footer{padding:14px 16px;border-top:1px solid var(--line);display:grid;gap:6px}.app{display:grid;grid-template-rows:auto auto 1fr;background:linear-gradient(180deg,rgba(12,18,35,.94),rgba(7,11,22,.98))}
+    #page-header,.hero{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.08)}#page-header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .copy{display:grid;gap:4px}.copy h1{margin:0;font-size:18px}.actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .pill{display:inline-flex;align-items:center;gap:8px;min-height:32px;padding:0 12px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05)}.pill[hidden]{display:none}
+    .hero{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:var(--muted)}.layout{min-height:0;display:grid;grid-template-rows:1fr auto}
+    .flex-1.overflow-hidden{min-height:0}.h-full.overflow-y-auto{height:100%;overflow:auto;padding:22px 20px 10px}#messages{display:grid;gap:16px}
+    .msg{display:grid;gap:8px;max-width:min(840px,100%);padding:16px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+    .msg[data-message-author-role="user"]{justify-self:end;background:linear-gradient(135deg,rgba(105,208,255,.18),rgba(139,255,207,.08))}.role{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+    .markdown{line-height:1.55}.markdown p,.markdown pre{margin:0}.markdown pre{overflow:auto;padding:14px 16px;border-radius:14px;background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.08);font:13px/1.5 Consolas,monospace}
+    #thread-bottom-container{border-top:1px solid var(--line);padding:18px 20px 20px;background:rgba(7,11,22,.82)}form.group\/composer{max-width:900px;margin:0 auto}
+    .composer-shell{display:grid;gap:12px;padding:14px;border-radius:22px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(22,32,59,.86),rgba(12,19,35,.96))}
+    .toolbar,.left,.right,.pills{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.toolbar{justify-content:space-between}.thinking button{background:transparent;color:inherit;border:0}
+    .wcDTda_prosemirror-parent{position:relative;min-height:120px;padding:12px 54px 12px 14px;border-radius:18px;background:rgba(5,8,18,.36);border:1px solid rgba(255,255,255,.08)}
+    #prompt-textarea.ProseMirror{min-height:92px;outline:none;white-space:pre-wrap}#prompt-textarea:empty::before{content:attr(data-placeholder);color:#7890c1}
+    [data-testid="send-button"]{position:absolute;right:10px;bottom:10px;width:38px;height:38px;border-radius:12px;border:0;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#06111e;font-size:18px;font-weight:700}
+    [data-testid="composer-plus-btn"]{padding:0 12px}[data-testid="file-input"]{display:none}
+    .menu{position:fixed;min-width:220px;padding:8px;border-radius:18px;border:1px solid rgba(255,255,255,.1);background:rgba(13,19,36,.96);box-shadow:0 18px 48px rgba(0,0,0,.35);z-index:9999}.menu[hidden]{display:none}
+    .menu-title{padding:8px 10px 6px;color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase}.item{width:100%;min-height:40px;padding:0 12px;border-radius:12px;border:0;text-align:left;color:var(--text);background:transparent}.item:hover{background:rgba(255,255,255,.06)}
+    @media (max-width:980px){body{padding:0}.page{min-height:100vh;border-radius:0;grid-template-columns:auto 1fr}.launcher{display:none}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="launcher"><button aria-label="Open sidebar" aria-expanded="true" aria-controls="stage-slideover-sidebar" class="icon" type="button">☰</button></div>
+    <aside id="stage-slideover-sidebar">
+      <div class="shell">
+        <div class="row"><div class="brand"><strong>Sidecar Demo</strong><span>Local composer host for WXT</span></div><button aria-label="Close sidebar" aria-expanded="true" aria-controls="stage-slideover-sidebar" data-testid="close-sidebar-button" class="icon" type="button">×</button></div>
+        <button class="primary new" id="new-chat-button" type="button">New Chat</button>
+        <nav aria-label="Chat history"><ol id="history-list"></ol></nav>
+        <div class="footer"><div class="meta">This page mimics the minimum ChatGPT DOM that Sidecar expects.</div><div class="meta">Use it to validate dock mounting, menus, model move, prompts, and composer actions.</div></div>
+      </div>
+    </aside>
+    <section class="app">
+      <header id="page-header">
+        <div class="copy"><div class="muted">WXT-native Sidecar demo host</div><h1 id="thread-title">Demo thread</h1><div class="muted" id="thread-subtitle">Local HTML page with a ChatGPT-like layout and composer.</div></div>
+        <div class="actions"><div class="pill" id="project-pill" hidden>Project</div><div class="pill">Composer ready</div><button data-testid="model-switcher-dropdown-button" id="model-switcher-button" aria-haspopup="menu" aria-expanded="false" type="button" class="ghost" style="padding:0 14px">ChatGPT <span id="model-name">5.4 Thinking</span></button></div>
+      </header>
+      <div class="hero"><div>Route: <strong id="route-label">/c/demo-thread</strong></div><div>Try the dock buttons against this page before moving back to the live host.</div></div>
+      <div class="layout">
+        <div class="flex-1 overflow-hidden"><div class="h-full overflow-y-auto"><div id="messages"></div><div id="cgpt-bottom-spacer" style="height:16px"></div></div></div>
+        <div class="composer" id="thread-bottom-container">
+          <form class="group/composer">
+            <div class="composer-shell">
+              <div class="toolbar">
+                <div class="left"><div class="pills"><div class="pill thinking __composer-pill-composite"><button class="__composer-pill" type="button">Extended Thinking</button><button class="__composer-pill-remove" type="button" aria-label="Remove Extended thinking">×</button></div></div></div>
+                <div class="right"><button type="button" class="ghost" data-testid="composer-plus-btn">+</button><input data-testid="file-input" id="demo-file-input" type="file"><div class="muted" id="composer-status">Ready</div></div>
+              </div>
+              <div class="wcDTda_prosemirror-parent"><div id="prompt-textarea" class="ProseMirror" contenteditable="true" tabindex="0" data-placeholder="Ask for a code sample, open the model menu, or move this chat to a project."></div><button data-testid="send-button" aria-label="Send message" type="submit">↑</button></div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div id="history-item-menu" class="menu" role="menu" hidden></div>
+  <div id="model-menu" class="menu" role="menu" hidden></div>
+  <div id="project-picker" class="menu" role="menu" hidden></div>
+  <script>
+    (() => {
+      const routes = { chat: (id) => `/c/${id}`, project: (project, id) => `/project/${project}/c/${id}` };
+      const demoProjects = [{ id: "design-system", label: "Design system" }, { id: "migration", label: "Migration work" }, { id: "playground", label: "Playground" }];
+      const demoThreads = [
+        { id: "demo-thread", title: "Dock parity audit", subtitle: "Core feature run-through", messages: [{ role: "assistant", html: "<p>This local host gives the WXT Sidecar build a stable mount target while the host adapter work settles.</p>" }, { role: "assistant", html: "<p>Try the code tools on this block:</p><pre><code class=\"language-ts\">export function createDockState(id: string) {\\n  return { id, mountedAt: Date.now(), ready: true };\\n}</code></pre>" }] },
+        { id: "ideas-thread", title: "Composer experiments", subtitle: "Prompt and emoji workflows", messages: [{ role: "assistant", html: "<p>Ask for an HTML or TypeScript snippet to exercise prompt insertion and code enhancement.</p>" }] },
+        { id: "release-thread", title: "Release notes draft", subtitle: "Local demo for menus and model move", messages: [{ role: "assistant", html: "<p>Use the sidebar options menu to trigger <strong>Move to project</strong> and verify the project flow.</p>" }] }
+      ];
+      const state = { modelName: "5.4 Thinking", projectId: null, threads: new Map(demoThreads.map((thread) => [thread.id, structuredClone(thread)])) };
+      const historyList = document.getElementById("history-list");
+      const messages = document.getElementById("messages");
+      const routeLabel = document.getElementById("route-label");
+      const threadTitle = document.getElementById("thread-title");
+      const threadSubtitle = document.getElementById("thread-subtitle");
+      const composer = document.getElementById("prompt-textarea");
+      const composerStatus = document.getElementById("composer-status");
+      const openSidebarButton = document.querySelector('button[aria-label="Open sidebar"]');
+      const closeSidebarButton = document.querySelector('button[data-testid="close-sidebar-button"]');
+      const sidebar = document.getElementById("stage-slideover-sidebar");
+      const projectPill = document.getElementById("project-pill");
+      const modelName = document.getElementById("model-name");
+      const modelButton = document.getElementById("model-switcher-button");
+      const modelMenu = document.getElementById("model-menu");
+      const historyItemMenu = document.getElementById("history-item-menu");
+      const projectPicker = document.getElementById("project-picker");
+      const newChatButton = document.getElementById("new-chat-button");
+      const plusButton = document.querySelector('[data-testid="composer-plus-btn"]');
+      const fileInput = document.getElementById("demo-file-input");
+      const modelChoices = ["5.4 Thinking", "5.4 Fast", "4.1", "4o"];
+
+      const escapeHtml = (value) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const getParts = (pathname) => pathname.split("/").filter(Boolean);
+      const getThreadId = (pathname) => { const parts = getParts(pathname); const index = parts.indexOf("c"); return index >= 0 && parts[index + 1] ? parts[index + 1] : "demo-thread"; };
+      const getProjectId = (pathname) => { const parts = getParts(pathname); const index = parts.indexOf("project"); return index >= 0 && parts[index + 1] ? parts[index + 1] : null; };
+      const currentThread = () => { const id = getThreadId(location.pathname); if (!state.threads.has(id)) state.threads.set(id, { id, title: id.replace(/-/g, " "), subtitle: "New local demo thread", messages: [] }); return state.threads.get(id); };
+      const currentPath = (id = currentThread().id) => state.projectId ? routes.project(state.projectId, id) : routes.chat(id);
+      const scrollToBottom = () => queueMicrotask(() => { const scroller = document.querySelector(".h-full.overflow-y-auto"); if (scroller) scroller.scrollTop = scroller.scrollHeight; });
+      const closeMenus = () => { historyItemMenu.hidden = true; modelMenu.hidden = true; projectPicker.hidden = true; modelButton.setAttribute("aria-expanded", "false"); document.querySelectorAll('button[data-testid$="-options"]').forEach((button) => button.setAttribute("aria-expanded", "false")); };
+      const positionMenu = (target, menu) => { const rect = target.getBoundingClientRect(); menu.style.top = `${Math.min(innerHeight - 180, rect.bottom + 8)}px`; menu.style.left = `${Math.max(16, Math.min(innerWidth - 260, rect.left - 180 + rect.width))}px`; };
+      const setSidebarOpen = (open) => { sidebar.style.width = open ? "280px" : "0px"; sidebar.style.opacity = open ? "1" : "0"; const nav = sidebar.querySelector('nav[aria-label="Chat history"]'); if (nav) open ? nav.removeAttribute("inert") : nav.setAttribute("inert", ""); openSidebarButton.style.display = open ? "none" : "inline-grid"; openSidebarButton.setAttribute("aria-expanded", open ? "true" : "false"); closeSidebarButton.style.display = open ? "inline-grid" : "none"; closeSidebarButton.setAttribute("aria-expanded", open ? "true" : "false"); };
+
+      function renderHistory() {
+        const path = location.pathname;
+        const activeId = currentThread().id;
+        historyList.innerHTML = "";
+        Array.from(state.threads.values()).forEach((thread, index) => {
+          const li = document.createElement("li");
+          li.innerHTML = `<a href="${routes.chat(thread.id)}" draggable="true" aria-current="${thread.id === activeId ? "page" : "false"}"><span>${thread.title}</span><span class="meta">${thread.subtitle}</span></a><div class="opts"><button type="button" aria-label="Conversation actions" aria-haspopup="menu" aria-expanded="false" data-testid="history-item-${index + 1}-options">⋯</button></div>`;
+          const anchor = li.querySelector("a");
+          if (path.endsWith(anchor.getAttribute("href")) || thread.id === activeId) anchor.setAttribute("aria-current", "page");
+          historyList.appendChild(li);
+        });
+      }
+
+      function renderMessages() {
+        messages.innerHTML = "";
+        currentThread().messages.forEach((message) => {
+          const card = document.createElement("article");
+          card.className = "msg";
+          card.setAttribute("data-message-author-role", message.role);
+          card.innerHTML = `<div class="role">${message.role}</div><div class="markdown">${message.html}</div>`;
+          messages.appendChild(card);
+        });
+        scrollToBottom();
+      }
+
+      function renderHeader() {
+        const thread = currentThread();
+        threadTitle.textContent = thread.title;
+        threadSubtitle.textContent = state.projectId ? `Project route active: ${state.projectId}` : thread.subtitle;
+        routeLabel.textContent = location.pathname;
+        modelName.textContent = state.modelName;
+        document.title = `${thread.title} · Sidecar Demo`;
+        if (state.projectId) {
+          const project = demoProjects.find((item) => item.id === state.projectId);
+          projectPill.hidden = false;
+          projectPill.textContent = project ? project.label : state.projectId;
+        } else {
+          projectPill.hidden = true;
+        }
+      }
+
+      const renderAll = () => { state.projectId = getProjectId(location.pathname); renderHistory(); renderMessages(); renderHeader(); };
+
+      function assistantReply(prompt) {
+        const text = prompt.trim().toLowerCase();
+        if (text.includes("html")) return "<p>Here is an HTML block for the code tools:</p><pre><code class=\"language-html\">&lt;section class=&quot;card&quot;&gt;\\n  &lt;h2&gt;Demo Composer&lt;/h2&gt;\\n  &lt;p&gt;Mounted from the WXT build.&lt;/p&gt;\\n&lt;/section&gt;</code></pre>";
+        if (text.includes("code") || text.includes("typescript")) return "<p>TypeScript example:</p><pre><code class=\"language-ts\">type DemoComposer = {\\n  id: string;\\n  mounted: boolean;\\n};\\n\\nexport const demoComposer: DemoComposer = {\\n  id: \\\"prompt-textarea\\\",\\n  mounted: true,\\n};</code></pre>";
+        return `<p>Echo from the local demo host: ${escapeHtml(prompt)}</p>`;
+      }
+
+      function sendComposerMessage() {
+        const text = composer.innerText.trim();
+        if (!text) return;
+        currentThread().messages.push({ role: "user", html: `<p>${escapeHtml(text)}</p>` });
+        composer.innerHTML = "";
+        composerStatus.textContent = "Sending…";
+        renderMessages();
+        setTimeout(() => { currentThread().messages.push({ role: "assistant", html: assistantReply(text) }); composerStatus.textContent = "Ready"; renderMessages(); }, 320);
+      }
+
+      function openHistoryMenu(button) {
+        const threadLink = button.closest("li")?.querySelector('a[href*="/c/"]');
+        const threadId = threadLink ? getThreadId(threadLink.getAttribute("href")) : currentThread().id;
+        closeMenus();
+        positionMenu(button, historyItemMenu);
+        historyItemMenu.innerHTML = `<div class="menu-title">Conversation actions</div><button class="item" role="menuitem" type="button">Share link</button><button class="item" role="menuitem" type="button">Rename thread</button><button class="item" role="menuitem" type="button" data-action="move-to-project" data-thread-id="${threadId}">Move to project</button>`;
+        historyItemMenu.hidden = false;
+        button.setAttribute("aria-expanded", "true");
+      }
+
+      function openProjectPicker(trigger, threadId) {
+        closeMenus();
+        positionMenu(trigger, projectPicker);
+        projectPicker.innerHTML = `<div class="menu-title">Move to project</div>${demoProjects.map((project) => `<button class="item" role="menuitem" type="button" data-project-id="${project.id}" data-thread-id="${threadId}">${project.label}</button>`).join("")}`;
+        projectPicker.hidden = false;
+      }
+
+      function openModelMenu() {
+        if (modelButton.getAttribute("aria-expanded") === "true") { closeMenus(); return; }
+        closeMenus();
+        positionMenu(modelButton, modelMenu);
+        modelMenu.innerHTML = `<div class="menu-title">Model picker</div>${modelChoices.map((choice) => `<button class="item" role="menuitem" type="button" data-model-choice="${choice}">${choice}</button>`).join("")}`;
+        modelButton.setAttribute("aria-expanded", "true");
+        modelMenu.hidden = false;
+      }
+
+      document.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        const historyLink = target.closest('#history-list a[href*="/c/"]');
+        if (historyLink) { event.preventDefault(); history.pushState({}, "", currentPath(getThreadId(historyLink.getAttribute("href")))); renderAll(); closeMenus(); return; }
+        const optionsButton = target.closest('button[data-testid^="history-item-"][data-testid$="-options"]');
+        if (optionsButton) { event.preventDefault(); openHistoryMenu(optionsButton); return; }
+        const moveToProject = target.closest('#history-item-menu [data-action="move-to-project"]');
+        if (moveToProject) { openProjectPicker(moveToProject, moveToProject.getAttribute("data-thread-id")); return; }
+        const projectChoice = target.closest('#project-picker [data-project-id]');
+        if (projectChoice) { const nextProjectId = projectChoice.getAttribute("data-project-id"); const threadId = projectChoice.getAttribute("data-thread-id") || currentThread().id; state.projectId = nextProjectId; history.pushState({}, "", routes.project(nextProjectId, threadId)); renderAll(); closeMenus(); return; }
+        const modelChoice = target.closest('#model-menu [data-model-choice]');
+        if (modelChoice) { state.modelName = modelChoice.getAttribute("data-model-choice"); renderHeader(); closeMenus(); return; }
+        if (target === modelButton || target.closest("#model-switcher-button")) { openModelMenu(); return; }
+        if (target === openSidebarButton) { setSidebarOpen(true); return; }
+        if (target === closeSidebarButton) { setSidebarOpen(false); closeMenus(); return; }
+        if (target === plusButton) { fileInput.click(); return; }
+        if (target.closest(".__composer-pill-remove")) { target.closest(".__composer-pill-composite")?.remove(); return; }
+        if (!target.closest("#history-item-menu") && !target.closest("#model-menu") && !target.closest("#project-picker")) closeMenus();
+      });
+
+      document.querySelector('form.group\\/composer').addEventListener("submit", (event) => { event.preventDefault(); sendComposerMessage(); });
+      composer.addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); sendComposerMessage(); } });
+      fileInput.addEventListener("change", () => { composerStatus.textContent = fileInput.files?.[0]?.name ? `Selected ${fileInput.files[0].name}` : "Ready"; });
+      newChatButton.addEventListener("click", () => { const id = `demo-${Date.now().toString(36)}`; state.threads.set(id, { id, title: "Fresh local thread", subtitle: "Created from the demo host", messages: [{ role: "assistant", html: "<p>New thread ready. The dock should treat this route the same as any other conversation.</p>" }] }); history.pushState({}, "", currentPath(id)); renderAll(); closeMenus(); });
+      addEventListener("popstate", () => { renderAll(); closeMenus(); });
+
+      setSidebarOpen(true);
+      renderAll();
+      composer.focus();
+    })();
+  </script>
+</body>
+</html>

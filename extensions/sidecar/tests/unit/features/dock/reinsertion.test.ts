@@ -1,19 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { ensureDockInstalled } from '../../../../src/features/dock/dock';
 import { findComposerAnchor } from '../../../../src/features/composer/find';
-import { safeInsertBefore } from '../../../../src/core/dom';
 
 vi.mock('../../../../src/features/composer/find', () => ({
   findComposerAnchor: vi.fn()
 }));
-
-vi.mock('../../../../src/core/dom', async (importOriginal) => {
-    const actual = await importOriginal();
-    return {
-        ...(actual as any),
-        safeInsertBefore: vi.fn()
-    };
-});
 
 vi.mock('../../../../src/core/log', () => ({
     log: { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
@@ -51,50 +42,43 @@ describe('Dock Reinsertion Logic', () => {
     document.body.appendChild(parent);
 
     vi.clearAllMocks();
-    vi.useFakeTimers();
 
     (window as any).__CGPT_DOCK_CRASHED = undefined;
     
-    const existing = document.getElementById('cgpt-dock');
-    if (existing) existing.remove();
+    document.getElementById('cgpt-dock')?.remove();
+    document.getElementById('cgpt-ext-root')?.remove();
   });
 
   afterEach(() => {
-    vi.useRealTimers();
+    document.body.innerHTML = '';
   });
 
-  it('should start reinsertion loop and insert dock when anchor found', () => {
+  it('should position the dock when a visible composer anchor is found', () => {
     (findComposerAnchor as any).mockReturnValue({ parent, anchor });
-    (safeInsertBefore as any).mockImplementation((p: Node, n: Node) => {
-        p.appendChild(n);
-        return true;
-    });
     anchor.getBoundingClientRect = () => ({
-      width: 10,
-      height: 10,
+      width: 200,
+      height: 40,
       top: 0,
-      left: 0,
-      right: 10,
-      bottom: 10,
+      left: 10,
+      right: 210,
+      bottom: 40,
       x: 0,
       y: 0,
       toJSON: () => ({})
     } as DOMRect);
 
-    ensureDockInstalled({} as any);
-
-    vi.advanceTimersByTime(1100);
+    expect(ensureDockInstalled({} as any)).toBe(true);
 
     expect(findComposerAnchor).toHaveBeenCalled();
-    expect(safeInsertBefore).toHaveBeenCalled();
+    const dock = document.getElementById('cgpt-dock');
+    expect(dock).toBeTruthy();
+    expect(dock?.style.display).toBe('block');
+    expect(dock?.style.width).toBe('184px');
+    expect(dock?.style.left).toBe('18px');
   });
 
-  it('should skip reinsertion when anchor has no layout', () => {
+  it('should hide the dock when the anchor has no layout', () => {
     (findComposerAnchor as any).mockReturnValue({ parent, anchor });
-    (safeInsertBefore as any).mockImplementation((p: Node, n: Node) => {
-      p.appendChild(n);
-      return true;
-    });
     anchor.getBoundingClientRect = () => ({
       width: 0,
       height: 0,
@@ -107,10 +91,10 @@ describe('Dock Reinsertion Logic', () => {
       toJSON: () => ({})
     } as DOMRect);
 
-    ensureDockInstalled({} as any);
-    expect(safeInsertBefore).toHaveBeenCalledTimes(1);
-    vi.advanceTimersByTime(1100);
+    expect(ensureDockInstalled({} as any)).toBe(true);
 
-    expect(safeInsertBefore).toHaveBeenCalledTimes(1);
+    const dock = document.getElementById('cgpt-dock');
+    expect(dock).toBeTruthy();
+    expect(dock?.style.display).toBe('none');
   });
 });

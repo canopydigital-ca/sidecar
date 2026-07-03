@@ -28,10 +28,68 @@
       position: relative;
     }
 
-    .flex-1 {
+    main > .flex-1 {
       flex: 1;
       overflow-y: auto;
       padding: 20px;
+    }
+
+    .flex {
+      display: flex;
+    }
+
+    .flex-col {
+      flex-direction: column;
+    }
+
+    .md\:flex-col {
+      flex-direction: column;
+    }
+
+    .flex-1 {
+      flex: 1 1 0%;
+    }
+
+    .flex-grow {
+      flex-grow: 1;
+    }
+
+    .items-center {
+      align-items: center;
+    }
+
+    .items-stretch {
+      align-items: stretch;
+    }
+
+    .w-full {
+      width: 100%;
+    }
+
+    .relative {
+      position: relative;
+    }
+
+    .absolute {
+      position: absolute;
+    }
+
+    .py-2 {
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+    }
+
+    .md\:py-3 {
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+    }
+
+    .md\:pl-4 {
+      padding-left: 1rem;
+    }
+
+    .rounded-md {
+      border-radius: 0.375rem;
     }
 
     .composer {
@@ -203,7 +261,11 @@
       <!-- Mock Project Menu trigger -->
       <div style="padding: 10px;">
         <button id="mock-conv-actions" aria-label="Conversation actions">...</button>
-        <div id="mock-menu" style="display:none;">
+        <div
+          id="mock-menu"
+          role="menu"
+          style="display:none; position: absolute; background: #222; border: 1px solid #555; padding: 8px; z-index: 10000;"
+        >
           <div role="menuitem">Share</div>
           <div role="menuitem" id="mock-project-item">Move to project</div>
           <div role="menuitem">Delete</div>
@@ -213,6 +275,15 @@
             const m = document.getElementById('mock-menu');
             m.style.display = m.style.display === 'none' ? 'block' : 'none';
           });
+
+          // Mirror ChatGPT's per-history-item options button behavior so the host adapter path can be exercised.
+          const historyOptions = document.querySelector('button[data-testid="history-item-123-options"]');
+          if (historyOptions) {
+            historyOptions.addEventListener('click', () => {
+              const m = document.getElementById('mock-menu');
+              m.style.display = m.style.display === 'none' ? 'block' : 'none';
+            });
+          }
           document.getElementById('mock-project-item').addEventListener('click', () => {
             window.__mockProjectClicked = true;
           });
@@ -288,76 +359,6 @@
       // Init
       updateState();
     })();
-  </script>
-
-  // Initial state: width 260px (Open)
-  // openBtn should be hidden, closeBtn visible
-  // Actually, let's start with width 260px, but verify visibility
-
-  function updateState() {
-  const width = parseInt(window.getComputedStyle(sidebarHost).width);
-  const isOpen = width >= 200;
-
-  if (isOpen) {
-  openBtn.style.display = 'none';
-  openBtn.setAttribute('aria-expanded', 'true');
-  closeBtn.style.display = 'block';
-  closeBtn.setAttribute('aria-expanded', 'true');
-  } else {
-  openBtn.style.display = 'block';
-  openBtn.setAttribute('aria-expanded', 'false');
-  closeBtn.style.display = 'none';
-  closeBtn.setAttribute('aria-expanded', 'false');
-  }
-  }
-
-  // Listen for clicks
-  openBtn.addEventListener('click', () => {
-  sidebarHost.style.width = '260px';
-  updateState();
-  });
-
-  closeBtn.addEventListener('click', () => {
-  sidebarHost.style.width = '0px';
-  updateState();
-  });
-
-  // Init
-  updateState();
-  })();
-  </script>
-  const openSpan = openBtn.closest('span');
-
-  function setSidebarState(open) {
-  if (open) {
-  // OPEN STATE: Open button hidden, Close button visible
-  openBtn.setAttribute('aria-expanded', 'true');
-  openBtn.style.display = 'none';
-  if (openSpan) openSpan.setAttribute('data-state', 'open');
-
-  closeBtn.style.display = 'block';
-  scrollport.removeAttribute('inert');
-  scrollport.style.opacity = '1';
-  scrollport.style.pointerEvents = 'auto';
-  } else {
-  // CLOSED STATE: Open button visible, Close button hidden
-  openBtn.setAttribute('aria-expanded', 'false');
-  openBtn.style.display = 'block';
-  if (openSpan) openSpan.setAttribute('data-state', 'closed');
-
-  closeBtn.style.display = 'none';
-  scrollport.setAttribute('inert', '');
-  scrollport.style.opacity = '0';
-  scrollport.style.pointerEvents = 'none';
-  }
-  }
-
-  if (openBtn) openBtn.addEventListener('click', () => setSidebarState(true));
-  if (closeBtn) closeBtn.addEventListener('click', () => setSidebarState(false));
-
-  // Initial State: Open
-  setSidebarState(true);
-  })();
   </script>
 
   <!-- Mock Menu Portal (root level) -->

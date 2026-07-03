@@ -1,4 +1,8 @@
 {
   "extends": "./.svelte-kit/tsconfig.json",
-  "compilerOptions": { "strict": false, "types": ["svelte"] }
+  "compilerOptions": {
+    "strict": false,
+    "types": ["svelte", "node", "vitest/globals"],
+    "resolveJsonModule": true
+  }
 }

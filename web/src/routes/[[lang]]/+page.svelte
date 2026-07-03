@@ -14,6 +14,7 @@
   import Seo from '$lib/components/Seo.svelte';
   import SecondaryFeatures from '$lib/components/SecondaryFeatures.svelte';
   import StoreButtons from '$lib/components/store-buttons/StoreButtons.svelte';
+  import site from '$lib/content/site.json';
 
   let { data } = $props<{ data: PageData }>();
 
@@ -67,15 +68,24 @@
           >{t.nav.testimonials}</a
         > -->
 
-        <a
-          href="https://github.com/your-org/sidecar"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center gap-2 px-4 py-2 bg-white text-zinc-950 rounded-lg text-sm font-bold hover:bg-zinc-200 transition-colors"
-        >
-          <Github class="w-4 h-4" />
-          {t.nav.github}
-        </a>
+        {#if site.githubUrl}
+          <a
+            href={site.githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-white text-zinc-950 rounded-lg text-sm font-bold hover:bg-zinc-200 transition-colors"
+          >
+            <Github class="w-4 h-4" />
+            {t.nav.github}
+          </a>
+        {:else}
+          <span
+            class="inline-flex items-center gap-2 px-4 py-2 bg-zinc-800 text-zinc-500 rounded-lg text-sm font-bold border border-zinc-700"
+          >
+            <Github class="w-4 h-4" />
+            Source pending
+          </span>
+        {/if}
       </div>
 
       <button
@@ -112,15 +122,24 @@
           onclick={closeMenu}
           class="text-zinc-400 hover:text-white">{t.nav.testimonials}</a
         > -->
-        <a
-          href="https://github.com/your-org/sidecar"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="w-full py-4 bg-emerald-500 text-white rounded-xl font-bold text-center inline-flex items-center justify-center gap-2"
-        >
-          <Github class="w-5 h-5" />
-          {t.nav.github}
-        </a>
+        {#if site.githubUrl}
+          <a
+            href={site.githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="w-full py-4 bg-emerald-500 text-white rounded-xl font-bold text-center inline-flex items-center justify-center gap-2"
+          >
+            <Github class="w-5 h-5" />
+            {t.nav.github}
+          </a>
+        {:else}
+          <span
+            class="w-full py-4 bg-zinc-800 text-zinc-500 rounded-xl font-bold text-center inline-flex items-center justify-center gap-2 border border-zinc-700"
+          >
+            <Github class="w-5 h-5" />
+            Source pending
+          </span>
+        {/if}
       </div>
     </div>
   {/if}
@@ -169,14 +188,22 @@
           <StoreButtons />
         </div>
 
-        <a
-          href="https://github.com/your-org/sidecar"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center justify-center gap-2 px-10 py-5 bg-white text-zinc-950 rounded-full text-lg font-bold hover:bg-emerald-400 hover:text-zinc-950 transition-all shadow-xl shadow-white/5"
-        >
-          <Github class="w-5 h-5" /> View GitHub / Source
-        </a>
+        {#if site.githubUrl}
+          <a
+            href={site.githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center justify-center gap-2 px-10 py-5 bg-white text-zinc-950 rounded-full text-lg font-bold hover:bg-emerald-400 hover:text-zinc-950 transition-all shadow-xl shadow-white/5"
+          >
+            <Github class="w-5 h-5" /> View GitHub / Source
+          </a>
+        {:else}
+          <span
+            class="inline-flex items-center justify-center gap-2 px-10 py-5 bg-zinc-800 text-zinc-500 rounded-full text-lg font-bold border border-zinc-700"
+          >
+            <Github class="w-5 h-5" /> Source pending
+          </span>
+        {/if}
 
         <p class="mt-6 text-zinc-600 text-sm">
           Available on all major browsers

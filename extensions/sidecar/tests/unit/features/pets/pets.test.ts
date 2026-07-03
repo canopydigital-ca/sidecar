@@ -2,90 +2,125 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mount, unmount, tick } from 'svelte';
 import PetsPopover from '../../../../src/ui/components/popovers/PetsPopover.svelte';
 
+const petsLayerMock = vi.hoisted(() => ({
+  initialize: vi.fn(),
+  setSettings: vi.fn(),
+  throwBall: vi.fn(),
+}));
+
+const settingsMock = vi.hoisted(() => {
+  const defaultSettings = {
+    version: 3,
+    enabled: false,
+    renderer: 'webview',
+    placementMode: 'dock-overlay',
+    scale: 1,
+    opacity: 0.6,
+    maxPets: 1,
+    speed: 1,
+    clickThrough: true,
+    pauseWhenTyping: true,
+    pauseOnInactivity: true,
+    reducedMotionMode: 'auto',
+    debug: false,
+    vendorEnabled: false,
+    petType: 'snake',
+    petColor: 'green',
+    backgroundMode: 'transparent',
+    backgroundTheme: null,
+    hideVendorUi: true,
+  };
+
+  return {
+    defaultSettings,
+    loadPetSettings: vi.fn(async () => defaultSettings),
+    savePetSettings: vi.fn(async () => {}),
+    savePetSettingsDebounced: vi.fn(),
+    watchPetSettings: vi.fn(() => vi.fn()),
+    resetPetSettings: vi.fn(async () => {}),
+    migratePetSettings: vi.fn((raw) => ({ ...defaultSettings, ...(raw ?? {}) })),
+  };
+});
+
+vi.mock('../../../../src/pets/layer/PetsLayer', () => ({
+  PetsLayer: {
+    getInstance: () => petsLayerMock,
+  },
+}));
+
+vi.mock('../../../../src/pets/core/settings', () => ({
+  BACKGROUND_MODE_NOTE: 'Background mode note',
+  DEFAULT_PET_SETTINGS: settingsMock.defaultSettings,
+  loadPetSettings: settingsMock.loadPetSettings,
+  migratePetSettings: settingsMock.migratePetSettings,
+  savePetSettings: settingsMock.savePetSettings,
+  savePetSettingsDebounced: settingsMock.savePetSettingsDebounced,
+  watchPetSettings: settingsMock.watchPetSettings,
+  resetPetSettings: settingsMock.resetPetSettings,
+}));
+
 describe('PetsPopover', () => {
-    let target: HTMLElement;
-    let onClose: () => void;
-    let app: any;
+  let target: HTMLElement;
+  let onClose: () => void;
+  let app: ReturnType<typeof mount> | undefined;
 
-    beforeEach(() => {
-        target = document.createElement('div');
-        document.body.appendChild(target);
-        onClose = vi.fn();
-        
-        // Mock chrome.runtime.getURL
-        global.chrome = {
-            runtime: {
-                getURL: vi.fn().mockReturnValue('mock-pets-host.html')
-            }
-        } as any;
+  beforeEach(() => {
+    target = document.createElement('div');
+    document.body.appendChild(target);
+    onClose = vi.fn();
+    vi.clearAllMocks();
+  });
 
-        (global as any).ResizeObserver = class {
-            observe() {}
-            unobserve() {}
-            disconnect() {}
-        };
-    });
+  afterEach(() => {
+    if (app) unmount(app);
+    app = undefined;
+    document.body.innerHTML = '';
+  });
 
-    afterEach(() => {
-        if (app) unmount(app);
-        document.body.innerHTML = '';
-        vi.restoreAllMocks();
-    });
+  async function mountPopover() {
+    app = mount(PetsPopover, { target, props: { onClose } });
+    await Promise.resolve();
+    await tick();
+  }
 
-    it('should render iframe with correct URL', () => {
-        app = mount(PetsPopover, { target, props: { onClose } });
-        
-        const iframe = target.querySelector('iframe');
-        expect(iframe).toBeTruthy();
-        expect(iframe?.src).toContain('mock-pets-host.html');
-    });
+  it('renders the current pets settings panel', async () => {
+    await mountPopover();
 
-    it('should send messages to iframe', async () => {
-        app = mount(PetsPopover, { target, props: { onClose } });
-        await tick();
-        const iframe = target.querySelector('iframe')!;
-        
-        // Mock contentWindow.postMessage
-        const postMessageSpy = vi.fn();
-        Object.defineProperty(iframe, 'contentWindow', {
-            value: {
-                postMessage: postMessageSpy
-            },
-            writable: true
-        });
+    expect(target.querySelector('h4')?.textContent).toContain('Pets Overlay');
+    expect(target.textContent).toContain('Enabled');
+    expect(target.textContent).toContain('Renderer');
+    expect(target.querySelector('[data-action="throw-ball"]')).toBeTruthy();
+  });
 
-        // Trigger spawn button
-        const spawnBtn = Array.from(target.querySelectorAll('button')).find(b => b.textContent?.includes('Spawn Cat'));
-        expect(spawnBtn).toBeTruthy();
-        if (spawnBtn) {
-             spawnBtn.click();
-        }
-        await tick();
+  it('loads settings and applies them to the pets layer', async () => {
+    await mountPopover();
 
-        expect(postMessageSpy).toHaveBeenCalledWith({
-            __dockToPets: {
-                command: 'spawn-pet',
-                type: 'cat',
-                color: 'brown'
-            }
-        }, '*');
-    });
+    expect(petsLayerMock.initialize).toHaveBeenCalled();
+    expect(settingsMock.loadPetSettings).toHaveBeenCalled();
+    expect(petsLayerMock.setSettings).toHaveBeenCalledWith(settingsMock.defaultSettings);
+    expect(settingsMock.watchPetSettings).toHaveBeenCalled();
+  });
 
-    it('should handle incoming messages', async () => {
-        const logSpy = vi.spyOn(console, 'log');
-        
-        app = mount(PetsPopover, { target, props: { onClose } });
-        await tick();
+  it('persists direct setting changes', async () => {
+    await mountPopover();
 
-        // Simulate message
-        const event = new MessageEvent('message', {
-            data: {
-                __vscodePets: { event: 'pet-spawned' }
-            }
-        });
-        window.dispatchEvent(event);
-        await tick();
+    const enabledToggle = target.querySelector<HTMLInputElement>('input[type="checkbox"]');
+    expect(enabledToggle).toBeTruthy();
 
-        expect(logSpy).toHaveBeenCalledWith('[Dock] Received pet event:', { event: 'pet-spawned' });
-    });
+    enabledToggle!.checked = true;
+    enabledToggle!.dispatchEvent(new Event('change', { bubbles: true }));
+    await tick();
+
+    expect(settingsMock.savePetSettings).toHaveBeenCalledWith({ enabled: true });
+  });
+
+  it('forwards throw-ball actions to the pets layer', async () => {
+    await mountPopover();
+
+    target
+      .querySelector<HTMLButtonElement>('[data-action="throw-ball"]')!
+      .click();
+
+    expect(petsLayerMock.throwBall).toHaveBeenCalled();
+  });
 });

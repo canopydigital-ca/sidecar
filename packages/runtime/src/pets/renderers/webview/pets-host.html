@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="pets-host-build" content="BUILD_STAMP_PLACEHOLDER" />
+	<title>VS Code Pets</title>
+
+	<!-- Vendor Styles -->
+	<link href="../vendor/vscode-pets/media/reset.css" rel="stylesheet">
+	<link href="../vendor/vscode-pets/media/pets.css" rel="stylesheet">
+
+	<style>
+		/* Host Overrides */
+		@font-face {
+			font-family: 'silkscreen';
+			src: url('../vendor/vscode-pets/media/Silkscreen-Regular.ttf') format('truetype');
+		}
+
+		/* Force Transparency on EVERYTHING */
+		html,
+		body,
+		#petCanvasContainer,
+		#petsContainer,
+		#foreground,
+		#background {
+			background: transparent !important;
+			background-color: transparent !important;
+			background-image: none;
+		}
+
+		/* Pass-through clicks for layers */
+		#petCanvasContainer,
+		#foreground,
+		#background {
+			pointer-events: none;
+		}
+
+		#petsContainer {
+			pointer-events: auto; /* Pets interact */
+		}
+
+		.collision {
+			pointer-events: none !important;
+		}
+
+		/* Hide vendor UI if requested */
+		html.hide-ui .pet-panel-controls,
+		html.hide-ui #pets-control-panel {
+			display: none !important;
+		}
+
+		/* Mode: Transparent (Default) */
+		html.mode-transparent body,
+		html.mode-transparent #petCanvasContainer,
+		html.mode-transparent #petsContainer,
+		html.mode-transparent #foreground,
+		html.mode-transparent #background {
+			background: transparent !important;
+			background-color: transparent !important;
+			background-image: none !important;
+		}
+
+		/* Mode: Solid Light */
+		html.mode-solid-light,
+		html.mode-solid-light body {
+			background-color: #ffffff !important;
+		}
+
+		/* Mode: Solid Dark */
+		html.mode-solid-dark,
+		html.mode-solid-dark body {
+			background-color: #212121 !important;
+			/* ChatGPT Dark Gray */
+		}
+
+		/* Mode: Debug */
+		html.mode-debug,
+		html.mode-debug body {
+			background-color: white !important;
+			background-image:
+				linear-gradient(45deg, #ccc 25%, transparent 25%),
+				linear-gradient(-45deg, #ccc 25%, transparent 25%),
+				linear-gradient(45deg, transparent 75%, #ccc 75%),
+				linear-gradient(-45deg, transparent 75%, #ccc 75%) !important;
+			background-size: 20px 20px !important;
+			background-position: 0 0, 0 10px, 10px -10px, -10px 0px !important;
+		}
+
+		/* Mode: Theme - Do nothing, let vendor CSS apply backgrounds */
+
+		/* Re-apply theme background logic if we want themes to work,
+           but usually for "dock" mode we want transparent.
+           If the user wants a background, they can set it in the host app.
+           For now, the requirement is "make the iframe / webview background transparent".
+        */
+
+		body {
+			overflow: hidden;
+		}
+
+		/* Debug overlay */
+		#debug-overlay {
+			position: fixed;
+			top: 0;
+			left: 0;
+			padding: 4px;
+			background: rgba(0, 0, 0, 0.7);
+			color: #0f0;
+			font-family: monospace;
+			font-size: 10px;
+			pointer-events: none;
+			z-index: 9999;
+			white-space: pre-wrap;
+		}
+
+		html,
+		body {
+			background: transparent !important;
+		}
+
+		#root,
+		#app,
+		.container {
+			background: transparent !important;
+		}
+
+		canvas {
+			background: transparent !important;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="debug-overlay"></div>
+
+	<!-- Mirrored DOM Structure from vscode-pets extension.js -->
+	<div id="petCanvasContainer">
+		<canvas id="ballCanvas"></canvas>
+		<canvas id="foregroundEffectCanvas"></canvas>
+		<canvas id="backgroundEffectCanvas"></canvas>
+	</div>
+	<div id="petsContainer"></div>
+	<div id="foreground"></div>
+	<div id="background"></div>
+
+	<!-- Scripts in deterministic order -->
+	<script defer src="pets-host.js"></script>
+	<script defer src="../vendor/vscode-pets/media/main-bundle.js"></script>
+	<script defer src="pets-boot.js"></script>
+</body>
+
+</html>

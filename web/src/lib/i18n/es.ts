@@ -162,15 +162,17 @@ export const es: Translation = {
     },
     downloads: {
       title: "Descargas Modulares",
-      description: "Personaliza tu instalación de Sidecar. Selecciona los componentes que necesitas.",
+      description: "Descarga la compilación WXT completa actual para cada navegador compatible. Las variantes ligeras quedan para una versión posterior.",
+      version: __SIDECAR_VERSION__,
+      baseUrl: "",
       totalSize: "Tamaño Total",
       download: "Descargar Seleccionados",
       modules: [
         {
           id: "core",
-          name: "Sidecar Core",
-          description: "Funcionalidad esencial y dock.",
-          size: 45,
+          name: "Sidecar completo",
+          description: "Dock principal, Pets, ProgressQuest, prompts, fuentes y barra de estado.",
+          size: 27,
           required: true
         },
         {

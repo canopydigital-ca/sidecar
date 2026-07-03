@@ -1,0 +1,43 @@
+{
+  "name": "sidecar-wxt",
+  "description": "WXT-native Sidecar build for ChatGPT",
+  "private": true,
+  "version": "0.6.0",
+  "type": "module",
+  "scripts": {
+    "dev": "bun ./scripts/dev-edge.ts",
+    "dev:demo": "bun ./scripts/dev-demo.ts",
+    "dev:watch": "wxt -b edge",
+    "dev:chrome": "wxt -b chrome",
+    "dev:firefox": "wxt -b firefox",
+    "dev:web-ext": "bun ./scripts/dev-web-ext.ts",
+    "demo:host": "bun ./scripts/demo-host.ts",
+    "open:edge": "bun ./scripts/open-edge-dev.ts",
+    "open:edge:dry": "bun ./scripts/open-edge-dev.ts --dry-run",
+    "build": "wxt build -e background -e chatgpt-dock",
+    "build:release": "bun ./scripts/package-release.ts --build-only",
+    "build:all": "wxt build",
+    "build:firefox": "wxt build -b firefox -e background -e chatgpt-dock",
+    "package:release": "bun ./scripts/package-release.ts",
+    "zip": "bun ./scripts/package-release.ts",
+    "zip:all": "wxt zip",
+    "zip:firefox": "bun ./scripts/package-release.ts --browser firefox",
+    "assert:style-parity": "bun ./scripts/assert-style-parity.ts --browser edge",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "typecheck": "bun run check",
+    "postinstall": "wxt prepare"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.18",
+    "@types/chrome": "^0.0.290",
+    "@sveltejs/vite-plugin-svelte": "^6.2.4",
+    "@tsconfig/svelte": "^5.0.7",
+    "@wxt-dev/module-svelte": "^2.0.4",
+    "svelte": "^5.49.2",
+    "svelte-check": "^4.3.6",
+    "tailwindcss": "^4.1.18",
+    "tslib": "^2.8.1",
+    "typescript": "^5.9.3",
+    "wxt": "^0.20.14"
+  }
+}

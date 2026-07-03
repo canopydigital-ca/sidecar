@@ -103,7 +103,8 @@ describe('WelcomePopover', () => {
         const onClose = vi.fn();
         const app = mount(WelcomePopover, { target, props: { onClose, mode: 'changelog', version: '1.0.0' } });
         
-        expect(target.querySelector('h2')?.textContent).toContain("What's New in v1.0.0");
+        expect(target.querySelector('h2')?.textContent).toContain("What’s new");
+        expect(target.querySelector('.pill')?.textContent).toContain('v1.0.0');
         expect(target.querySelector('.changelog-list')).toBeTruthy();
         
         unmount(app);

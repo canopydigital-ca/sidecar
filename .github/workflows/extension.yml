@@ -1,0 +1,42 @@
+name: extension-release
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*.*.*"]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install
+        working-directory: extensions/wxt
+        run: bun install --frozen-lockfile
+
+      - name: Check
+        working-directory: extensions/wxt
+        run: bun run check
+
+      - name: Package release artifacts
+        working-directory: extensions/wxt
+        run: bun run package:release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sidecar-release
+          path: |
+            extensions/wxt/release/manifest.json
+            extensions/wxt/release/SHA256SUMS.txt
+            extensions/wxt/release/artifacts/*.zip
+
+      - uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          files: |
+            extensions/wxt/release/manifest.json
+            extensions/wxt/release/SHA256SUMS.txt
+            extensions/wxt/release/artifacts/*.zip

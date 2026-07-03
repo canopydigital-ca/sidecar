@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ProgressQuest Icon Map v2",
+  "type": "object",
+  "required": ["metadata", "nodes"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["version", "generator"],
+      "properties": {
+        "version": { "type": "string" },
+        "generator": { "type": "string" },
+        "generatedAt": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "path", "rarityHex", "tags", "itemTypes", "visualGroup", "paletteSwaps"],
+        "properties": {
+          "id": { "type": "string" },
+          "path": { "type": "string" },
+          "rarityHex": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "itemTypes": { "type": "array", "items": { "type": "string" } },
+          "visualGroup": { "type": "string" },
+          "attributes": { "type": "object" },
+          "levelRange": {
+            "type": "object",
+            "properties": {
+              "min": { "type": "number" },
+              "max": { "type": "number" }
+            },
+            "additionalProperties": true
+          },
+          "paletteSwaps": {
+            "type": "object",
+            "required": ["primary"],
+            "properties": {
+              "primary": { "type": "object" }
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

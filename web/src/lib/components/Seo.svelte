@@ -29,7 +29,7 @@
     modifiedTime,
     twitterHandle: providedTwitterHandle,
     jsonLd: providedJsonLd,
-  } = $props<Props>();
+  }: Props = $props();
 
   // Derived values
   const _title = $derived(providedTitle || globalSeoData.defaultTitle);
@@ -63,9 +63,9 @@
   // Hreflang Generation
   // Assumes current path structure matches [[lang]]/...
   const hreflangs = $derived.by(() => {
-    const currentPath = $page.url.pathname;
+    const currentPath = String($page.url.pathname);
     // Strip existing lang prefix if present
-    let purePath = currentPath;
+    let purePath: string = currentPath;
     for (const code of Object.keys(locales)) {
       if (currentPath.startsWith(`/${code}/`) || currentPath === `/${code}`) {
         purePath = currentPath.replace(`/${code}`, '');
@@ -123,7 +123,7 @@
 
   // Combine Schemas
   const jsonLdScript = $derived.by(() => {
-    const schemas = [websiteSchema, applicationSchema];
+    const schemas: Array<Record<string, unknown>> = [websiteSchema, applicationSchema];
     if (providedJsonLd) schemas.push(providedJsonLd);
     return JSON.stringify(schemas);
   });

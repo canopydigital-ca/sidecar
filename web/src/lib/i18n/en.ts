@@ -174,15 +174,17 @@ export const en: Translation = {
     },
     downloads: {
       title: "Modular Downloads",
-      description: "Customize your Sidecar installation. Select the components you need to keep your footprint small.",
+      description: "Download the current full WXT build for each supported browser. Light variants are planned after the first store-ready release.",
+      version: __SIDECAR_VERSION__,
+      baseUrl: "",
       totalSize: "Total Install Size",
       download: "Download Selected",
       modules: [
         {
           id: "core",
-          name: "Sidecar Core",
-          description: "Essential runtime and dock functionality.",
-          size: 45,
+          name: "Sidecar Full",
+          description: "Core dock, Pets, ProgressQuest, prompts, fonts, and status tools.",
+          size: 27,
           required: true
         },
         {

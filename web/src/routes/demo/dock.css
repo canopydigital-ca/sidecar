@@ -1,0 +1,148 @@
+:root {
+  --cgpt-dock-bg: rgba(20, 20, 20, 0.55);
+  --cgpt-panel-bg: rgba(18, 18, 18, 0.94);
+  --cgpt-panel-bg2: rgba(12, 12, 12, 0.98);
+  --cgpt-border: rgba(255, 255, 255, 0.12);
+  --cgpt-border-soft: rgba(255, 255, 255, 0.10);
+  --cgpt-text: rgba(255, 255, 255, 0.92);
+  --cgpt-text-dim: rgba(255, 255, 255, 0.55);
+  --cgpt-focus: #10a37f;
+  --cgpt-gradient: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
+}
+
+/* Base Dock Container - Merged from styles.css (#cgpt-dock) and mountDock.ts */
+.cgpt-dock {
+  position: relative;
+  z-index: 50;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  margin: 0;
+  border-radius: 12px;
+  background: var(--cgpt-dock-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  width: auto;
+  box-sizing: border-box;
+  flex-wrap: nowrap;
+  color: var(--cgpt-text);
+}
+
+.cgpt-dock * {
+  box-sizing: border-box;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  min-width: 0;
+}
+
+.cgpt-spacer { flex: 1; }
+
+/* Button Styles - Merged from app.css and styles.css */
+.cgpt-btn {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--cgpt-text);
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+}
+
+.cgpt-btn:hover { background: rgba(255, 255, 255, 0.12); }
+.cgpt-btn:active { transform: translateY(1px); }
+
+.cgpt-btn[aria-pressed="true"] {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.cgpt-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Dock Item Wrapper */
+.cgpt-dock-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.cgpt-dock-item svg {
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+
+/* Progress Quest Bar Effect */
+.cgpt-dock-item[data-item-id="progressquest"][data-progressbar="1"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(16, 163, 127, 0.55) 0%,
+    rgba(16, 163, 127, 0.55) calc(var(--cgpt-pq-progress, 0) * 100%),
+    rgba(255, 255, 255, 0.02) calc(var(--cgpt-pq-progress, 0) * 100%),
+    rgba(255, 255, 255, 0.02) 100%
+  );
+}
+
+/* Input Styles */
+.cgpt-input {
+  width: 100%;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: #ececec;
+  font-size: 13px;
+  line-height: 1.4;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.cgpt-input:focus {
+  border-color: var(--cgpt-focus);
+  box-shadow: 0 0 0 1px var(--cgpt-focus);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(217, 217, 227, 0.3);
+  border-radius: 5px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(217, 217, 227, 0.5);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
