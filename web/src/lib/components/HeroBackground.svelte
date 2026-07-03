@@ -1,16 +1,15 @@
 <script lang="ts">
   import LottiePlayer from '$lib/components/animations/LottiePlayer.svelte';
-  import { onMount } from 'svelte';
 
   // Lottie URL for particles/universe effect
   // Using a reliable abstract particles animation as default
-  const PARTICLES_SRC = "https://assets5.lottiefiles.com/packages/lf20_tiviyc3p.json"; 
+  const PARTICLES_SRC = "https://assets5.lottiefiles.com/packages/lf20_tiviyc3p.json";
 
-  let mouseX = 0;
-  let mouseY = 0;
-  let innerWidth = 0;
-  let innerHeight = 0;
-  let container: HTMLDivElement;
+  let mouseX = $state(0);
+  let mouseY = $state(0);
+  let innerWidth = $state(0);
+  let innerHeight = $state(0);
+  let container = $state<HTMLDivElement | undefined>();
 
   function handleMouseMove(event: MouseEvent) {
     if (!container) return;
@@ -24,7 +23,7 @@
   }
 </script>
 
-<svelte:window bind:innerWidth bind:innerHeight on:mousemove={handleMouseMove} />
+<svelte:window bind:innerWidth bind:innerHeight onmousemove={handleMouseMove} />
 
 <div 
   bind:this={container}

@@ -1,6 +1,9 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
   import BrandMark from "$lib/components/BrandMark.svelte";
   import site from "$lib/content/site.json";
+
+  let { children }: { children?: Snippet } = $props();
 </script>
 
 <div class="min-h-screen bg-zinc-950 text-zinc-100">
@@ -18,7 +21,7 @@
   </header>
 
   <main class="container mx-auto px-6 py-16 max-w-3xl">
-    <slot />
+    {@render children?.()}
   </main>
 
   <footer class="border-t border-zinc-900 py-10 text-center text-zinc-600 text-sm">
