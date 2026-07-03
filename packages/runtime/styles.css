@@ -101,6 +101,10 @@
   cursor: row-resize;
   user-select: none;
   margin: 0 auto 6px auto;
+  /* The handle lives inside the pointer-events:none dock overlay stage; it must
+     opt back in so the drag-to-resize pointer events reach it. dock.ts also
+     sets this inline while positioning the handle above the rail each frame. */
+  pointer-events: auto;
 }
 
 #cgpt-input-resize-handle .cgpt-dots {

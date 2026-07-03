@@ -477,7 +477,16 @@ export class PetsLayer {
 
       this.applyFixedBoxPosition(container, left, top, baseWidth, baseHeight);
     } else {
+      // Fallback (no dock present): bottom-right corner. .mode-corner is a
+      // static bottom:20px rule with no status-bar awareness, so lift the pet
+      // above the Sidecar status bar when it's visible (every other placement
+      // path already subtracts the status-bar rect). updatePlacement() resets
+      // container.style.cssText first, so this inline bottom cleanly overrides
+      // the class rule and re-runs on status-bar show/hide via handleResize().
       container.classList.add('mode-corner');
+      const statusRect = this.resolveStatusBarRect();
+      const bottomInset = 20 + (statusRect ? statusRect.height : 0);
+      container.style.bottom = `${bottomInset}px`;
     }
   }
 

@@ -236,27 +236,46 @@ test.describe('WXT Parity Harness (fixture)', () => {
       await expect(dock.locator('button[data-action="sidebar"]')).toBeVisible();
     });
 
-    test('should have resize handle before dock', async ({ page }) => {
+    test('resize handle sits just above the dock and is grabbable', async ({ page }) => {
       const handle = page.locator('#cgpt-input-resize-handle');
       const dock = page.locator('#cgpt-dock');
       await expect(handle).toBeVisible();
       await expect(dock).toBeVisible();
 
-      const isBefore = await page.evaluate(() => {
+      const m = await page.evaluate(() => {
         const h = document.getElementById('cgpt-input-resize-handle');
         const d = document.getElementById('cgpt-dock');
-        return h && d && h.nextElementSibling === d;
+        if (!h || !d) return null;
+        const hr = h.getBoundingClientRect();
+        const dr = d.getBoundingClientRect();
+        return {
+          domOrder: h.nextElementSibling === d,
+          pointerEvents: getComputedStyle(h).pointerEvents,
+          // handle bottom should be just above the dock top (small positive gap)
+          gapAboveDock: Math.round(dr.top - hr.bottom),
+          // horizontally aligned to the dock
+          leftDelta: Math.round(hr.left - dr.left),
+          widthDelta: Math.round(hr.width - dr.width),
+        };
       });
-      expect(isBefore).toBe(true);
+      expect(m).not.toBeNull();
+      expect(m!.domOrder).toBe(true);
+      expect(m!.pointerEvents).not.toBe('none'); // must receive drag events
+      expect(m!.gapAboveDock).toBeGreaterThanOrEqual(0);
+      expect(m!.gapAboveDock).toBeLessThanOrEqual(12);
+      expect(Math.abs(m!.leftDelta)).toBeLessThanOrEqual(2);
+      expect(Math.abs(m!.widthDelta)).toBeLessThanOrEqual(2);
     });
 
-    test('should align dock with visible composer input shell', async ({ page }) => {
+    test('should align dock with the composer form', async ({ page }) => {
       await expect(page.locator('#cgpt-dock')).toBeVisible();
 
       const metrics = await page.evaluate(() => {
         const dock = document.getElementById('cgpt-dock') as HTMLElement | null;
-        const editor = document.getElementById('prompt-textarea') as HTMLElement | null;
-        const shell = editor?.parentElement as HTMLElement | null;
+        // Legacy parity: the dock anchors to the composer <form> (its rect
+        // matches the visible input box's left/width on real chatgpt). Anchoring
+        // to a wider inner wrapper shifted the rail left of the input box.
+        const shell = document.querySelector('form.group\\/composer') as HTMLElement | null;
         if (!dock || !shell) return null;
 
         const dockRect = dock.getBoundingClientRect();

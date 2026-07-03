@@ -18,6 +18,8 @@ const DOCK_STAGE_Z_INDEX = 2147483000;
 const EXT_ROOT_Z_INDEX = 2147483647;
 const DOCK_GAP = 8;
 const DOCK_INSET = 8;
+const INPUT_HANDLE_ID = "cgpt-input-resize-handle";
+const INPUT_HANDLE_GAP = 4;
 
 let _dockHost: HTMLElement | null = null;
 let _dockRoot: HTMLElement | null = null;
@@ -109,6 +111,7 @@ function positionDockInternal(tracker?: DockContext["trackSelectorPerformance"])
   const spot = findComposerAnchor(tracker);
   if (!spot || !spot.anchor) {
     dock.style.display = "none";
+    hideInputResizeHandle();
     return false;
   }
   const anchorEl = spot.anchor as Element;
@@ -120,6 +123,7 @@ function positionDockInternal(tracker?: DockContext["trackSelectorPerformance"])
   const rect = anchorEl.getBoundingClientRect();
   if (!rect || (rect.width === 0 && rect.height === 0)) {
     dock.style.display = "none";
+    hideInputResizeHandle();
     return false;
   }
   const viewportW = Math.max(0, window.innerWidth || document.documentElement.clientWidth || 0);
@@ -182,7 +186,41 @@ function positionDockInternal(tracker?: DockContext["trackSelectorPerformance"])
     }
   }
 
+  positionInputResizeHandle(dock);
   return true;
+}
+
+/**
+ * Positions the input resize handle (the three-dot grab bar) just above the
+ * dock/rail and makes it grabbable. The handle is inserted as a light-DOM
+ * sibling inside the fixed, pointer-events:none overlay stage, so left to its
+ * static CSS it renders at the viewport top-left and never receives pointer
+ * events. Here we fix it to the viewport just above the dock (which itself sits
+ * above the composer) and re-enable pointer events so the drag-to-resize works.
+ */
+function positionInputResizeHandle(dock: HTMLElement): void {
+  const handle = document.getElementById(INPUT_HANDLE_ID) as HTMLElement | null;
+  if (!handle) return;
+  const dockRect = dock.getBoundingClientRect();
+  if (dockRect.width === 0 && dockRect.height === 0) {
+    handle.style.display = "none";
+    return;
+  }
+  const handleHeight = handle.offsetHeight || 14;
+  handle.style.position = "fixed";
+  handle.style.margin = "0";
+  handle.style.left = `${Math.round(dockRect.left)}px`;
+  handle.style.width = `${Math.round(dockRect.width)}px`;
+  handle.style.maxWidth = "none";
+  handle.style.top = `${Math.round(dockRect.top - handleHeight - INPUT_HANDLE_GAP)}px`;
+  handle.style.pointerEvents = "auto";
+  handle.style.zIndex = String(DOCK_STAGE_Z_INDEX + 1);
+  handle.style.display = "flex";
+}
+
+function hideInputResizeHandle(): void {
+  const handle = document.getElementById(INPUT_HANDLE_ID) as HTMLElement | null;
+  if (handle) handle.style.display = "none";
 }
 
 function getDockContentWidth(dock: HTMLElement): number {

@@ -232,6 +232,32 @@ function resolveComposerInputShell(): ComposerShellResolution | null {
     depth += 1;
   }
 
+  // Legacy parity: the composer <form> is the canonical anchor — its rect
+  // matches the visible input box's left/width. Prefer it over the scored
+  // inner-shell candidates, which pick the *widest* bounded wrapper and so
+  // shift the dock left of (and wider than) the visible input box.
+  if (boundary) {
+    return { element: boundary, method: "structural:composer-form", boundary };
+  }
+
+  // The upward walk can be cut short by a false thread-bottom boundary (e.g. a
+  // `.composer`-classed wrapper nested inside the real form), leaving `boundary`
+  // null. `closest` still sees the full ancestor chain, so recover the
+  // structural form anchor directly.
+  for (const selector of CHATGPT_SELECTORS.composerForm) {
+    let form: Element | null = null;
+    try {
+      form = editor.closest(selector);
+    } catch {
+      continue;
+    }
+    if (form && hasUsableRect(form)) {
+      return { element: form, method: "structural:composer-form", boundary: form };
+    }
+  }
+
+  // No composer form anywhere in the ancestry (unusual DOM variant): fall back
+  // to the widest scored inner shell, then the editor's parent.
   if (candidates.length > 0) {
     candidates.sort((a, b) => {
       const scoreDiff = scoreComposerSurface(b, editorRect) - scoreComposerSurface(a, editorRect);
@@ -242,33 +268,7 @@ function resolveComposerInputShell(): ComposerShellResolution | null {
       return Math.max(0, editorRect.top - ar.top) - Math.max(0, editorRect.top - br.top);
     });
 
-    return {
-      element: candidates[0],
-      method: bounded ? "heuristic:bounded" : "heuristic:unbounded",
-      boundary,
-    };
-  }
-
-  if (boundary) {
-    return { element: boundary, method: "structural:composer-form", boundary };
-  }
-
-  // The walk can be cut short by a false thread-bottom boundary (e.g. a
-  // `.composer`-classed wrapper nested inside the real form). `closest` still
-  // sees the full ancestor chain, so recover the structural form anchor
-  // before degrading to the editor's parent.
-  if (bounded) {
-    for (const selector of CHATGPT_SELECTORS.composerForm) {
-      let form: Element | null = null;
-      try {
-        form = editor.closest(selector);
-      } catch {
-        continue;
-      }
-      if (form && hasUsableRect(form)) {
-        return { element: form, method: "structural:composer-form", boundary: form };
-      }
-    }
+    return { element: candidates[0], method: "heuristic:unbounded", boundary };
   }
 
   return { element: editor.parentElement ?? editor, method: "fallback:editor-parent", boundary: null };
@@ -442,7 +442,20 @@ function findHistoryItemOptionsButton(item: Element): HTMLElement | null {
 
   if (!group) return null;
 
-  const button = queryFirstBySelectors(CHATGPT_SELECTORS.sidebarHistoryItemOptionsButton, group, isInteractive);
+  // ChatGPT reveals the row's three-dot options button on hover
+  // (opacity-0 group-hover:opacity-100), so its computed opacity is "0" until
+  // the row is hovered. Nudge the row with a pointerover first, then look it up
+  // WITHOUT the isInteractive visibility gate — the button is present in the
+  // DOM and programmatically clickable regardless of hover state (legacy did
+  // the same). Gating on visibility here was what broke "Move to project".
+  try {
+    group.dispatchEvent(new PointerEvent("pointerover", { bubbles: true }));
+    (group as HTMLElement).dispatchEvent?.(new MouseEvent("mouseover", { bubbles: true }));
+  } catch {
+    /* pointer/mouse events unavailable — the un-gated lookup below still works */
+  }
+
+  const button = queryFirstBySelectors(CHATGPT_SELECTORS.sidebarHistoryItemOptionsButton, group);
   return button instanceof HTMLElement ? button : null;
 }
 
