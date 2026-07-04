@@ -79,7 +79,11 @@ export function startRecentPromptCapture(tracker: PerfTracker) {
       if (el && (el.nodeName === "TEXTAREA" || el.getAttribute("contenteditable") === "true")) {
         // Check if it's the composer
         const ta = findComposerTextarea(tracker);
-        if (ta && (el === ta || ta.contains(el) || el.contains(ta))) {
+        // The `el.id === "prompt-textarea"` fallback (legacy parity) catches
+        // Enter presses that target ChatGPT's native #prompt-textarea directly
+        // when it isn't the containment-matched ProseMirror node — without it,
+        // those submissions are missed for Up-arrow prompt recall.
+        if (ta && (el === ta || ta.contains(el) || el.contains(ta) || el.id === "prompt-textarea")) {
           // If it is contenteditable, we might need to get textContent
           let val = el.value;
           if (typeof val !== "string") val = el.innerText; // Fallback for contenteditable

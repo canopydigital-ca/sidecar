@@ -466,7 +466,10 @@
         // Find all matches then pick random
         const allMatches = pqIconMap.nodes.filter(config.find);
         if (allMatches.length > 0) {
-          const idx = Math.abs(randomSeed + slot.id.length) % allMatches.length;
+          // Legacy parity: independent uniform-random pick per slot. The prior
+          // `(randomSeed + slot.id.length) % len` was deterministic and shifted
+          // every slot by the same amount, so a re-roll felt correlated/repetitive.
+          const idx = Math.floor(Math.random() * allMatches.length);
           candidate = allMatches[idx];
         }
       } else {
