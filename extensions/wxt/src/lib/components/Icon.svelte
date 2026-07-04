@@ -4,21 +4,32 @@
   import localIcons from '@icons/icons.local.json';
   import { iconMap } from '@icons/iconMap';
 
-  export let name: string;
-  export let size: number | string = 24;
-  export let color: string = 'currentColor';
-  export let strokeWidth: number | string = 2;
-  export let absoluteStrokeWidth: boolean = false; // Lucide prop, might not apply here but good to keep API compatible
+  let {
+    name,
+    size = 24,
+    color = 'currentColor',
+    strokeWidth = 2,
+    absoluteStrokeWidth = false, // Lucide prop, kept for API compatibility
+    class: className = undefined,
+    ...rest
+  }: {
+    name: string;
+    size?: number | string;
+    color?: string;
+    strokeWidth?: number | string;
+    absoluteStrokeWidth?: boolean;
+    class?: string;
+  } & Record<string, unknown> = $props();
 
   const allIcons = { ...icons, ...newIcons, ...localIcons };
 
-  // Resolve hash from name
-  $: hash = iconMap[name as keyof typeof iconMap] || name;
-  $: iconData = (allIcons as any)[hash];
-  $: svgContent = iconData?.svg || '';
+  // Resolve hash from name (pure derivations)
+  const hash = $derived(iconMap[name as keyof typeof iconMap] || name);
+  const iconData = $derived((allIcons as any)[hash]);
+  const svgContent = $derived(iconData?.svg || '');
 
   // Extract viewBox if possible or default to 20 20
-  $: viewBox = iconData?.meta?.viewBox || '0 0 20 20';
+  const viewBox = $derived(iconData?.meta?.viewBox || '0 0 20 20');
 
   // If the SVG string contains the <svg> tag, we need to strip it or render it differently.
   // The icons.json contains full <svg ...>...</svg> strings.
@@ -30,7 +41,7 @@
     return match ? match[1] : svg;
   }
 
-  $: innerContent = getInnerSvg(svgContent);
+  const innerContent = $derived(getInnerSvg(svgContent));
 </script>
 
 <svg
@@ -43,8 +54,8 @@
   stroke-width={absoluteStrokeWidth ? strokeWidth : strokeWidth}
   stroke-linecap="round"
   stroke-linejoin="round"
-  class={$$props.class}
-  {...$$restProps}
+  class={className}
+  {...rest}
 >
   {@html innerContent}
 </svg>
