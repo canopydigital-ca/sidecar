@@ -1,3 +1,3 @@
-79a112b5ae9204e35206b4f1389ab008b921cf24579b29f170f8876bd78048a7  artifacts/sidecar-v0.6.0-chrome-mv3-full.zip
-79a112b5ae9204e35206b4f1389ab008b921cf24579b29f170f8876bd78048a7  artifacts/sidecar-v0.6.0-edge-mv3-full.zip
-79fc3c40331572cbed3c5129e5f603a1ba425996d45d262d44f9048f0243e90d  artifacts/sidecar-v0.6.0-firefox-mv2-full.zip
+6300721ceeac2939ce6aee1340e10a07c80bbbd20b0d0e63b1ac703ebe0bc459  artifacts/sidecar-v0.6.0-chrome-mv3-full.zip
+6300721ceeac2939ce6aee1340e10a07c80bbbd20b0d0e63b1ac703ebe0bc459  artifacts/sidecar-v0.6.0-edge-mv3-full.zip
+90ca66eb7489e40eb2b21d2280655ba3e33e220c258e5215ce3d2ea623763126  artifacts/sidecar-v0.6.0-firefox-mv2-full.zip
