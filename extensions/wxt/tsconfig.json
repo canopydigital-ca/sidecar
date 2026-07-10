@@ -4,6 +4,8 @@
     "useDefineForClassFields": true,
     "types": ["chrome"],
     "paths": {
+      "@runtime": ["../../packages/runtime/src"],
+      "@runtime/*": ["../../packages/runtime/src/*"],
       "@icons/*": ["../../packages/icons/*"],
       "@sidecar/runtime": ["../../packages/runtime/src"],
       "@sidecar/runtime/*": ["../../packages/runtime/src/*"],

@@ -1,11 +1,11 @@
 <script lang="ts">
-  export let variant: 'hero' | 'cta' = 'hero';
-
   import ChromeStoreButton from './ChromeStoreButton.svelte';
   import EdgeStoreButton from './EdgeStoreButton.svelte';
   import FirefoxStoreButton from './FirefoxStoreButton.svelte';
 
-  const compactClass = variant === 'hero' ? '' : 'scale-95';
+  let { variant = 'hero' }: { variant?: 'hero' | 'cta' } = $props();
+
+  const compactClass = $derived(variant === 'hero' ? '' : 'scale-95');
 </script>
 
 <div

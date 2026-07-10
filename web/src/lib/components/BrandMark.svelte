@@ -1,7 +1,7 @@
 <script lang="ts">
-  export let size: 'sm' | 'md' = 'sm';
-  const box = size === 'sm' ? 'w-8 h-8' : 'w-10 h-10';
-  const text = size === 'sm' ? 'text-sm' : 'text-base';
+  let { size = 'sm' }: { size?: 'sm' | 'md' } = $props();
+  const box = $derived(size === 'sm' ? 'w-8 h-8' : 'w-10 h-10');
+  const text = $derived(size === 'sm' ? 'text-sm' : 'text-base');
 </script>
 
 <div

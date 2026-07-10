@@ -4,10 +4,10 @@ WXT-native Sidecar build for ChatGPT.
 
 ## Status
 
-- `extensions/wxt` is the build you should install and use.
-- `extensions/sidecar` is the frozen legacy build kept as a parity reference.
+- `extensions/wxt` is the active build — install, develop, and test here.
+- Runtime source lives in `packages/runtime`; the ChatGPT host adapter in `packages/host-chatgpt`.
 
-## Features (Parity Target)
+## Features
 
 - Dock UI with configurable items
 - Sidebar toggle + sidebar width persistence

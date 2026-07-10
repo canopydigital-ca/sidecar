@@ -75,7 +75,10 @@ export function ensureDockMount(target: HTMLElement, initialProps: DockProps): D
       -webkit-backdrop-filter: blur(10px);
       box-sizing: border-box;
       flex-wrap: nowrap;
-      overflow-x: hidden;
+      /* Scroll the button row (rather than clip it) when it can't fit at
+         narrow viewport widths, so every dock button stays reachable. The
+         scrollbar itself stays hidden (see rules below) for a clean look. */
+      overflow-x: auto;
       overflow-y: hidden;
       scrollbar-width: none;
       color: var(--text-primary, currentColor);

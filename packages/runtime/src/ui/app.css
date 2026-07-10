@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+/*
+ * Tailwind v4's Vite plugin is rooted at extensions/wxt, so its automatic
+ * source detection never sees the Svelte/TS markup in this workspace package.
+ * Explicitly point Tailwind at packages/runtime/src (the tree that renders into
+ * the shadow UI, including popovers) so every utility class used there is
+ * generated. Paths are relative to this file (packages/runtime/src/ui/app.css),
+ * so ".." scans packages/runtime/src only — scoped to src so stray package-root
+ * files are never scanned. packages/ui and packages/addons only re-export from
+ * here, so they need no separate @source. Do NOT add extensions/wxt/.output or
+ * node_modules.
+ */
+@source "..";
+
 @theme {
   --color-cgpt-dock-bg: rgba(20, 20, 20, 0.55);
   --color-cgpt-panel-bg: rgba(18, 18, 18, 0.94);

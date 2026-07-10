@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -26,28 +26,24 @@ jobs:
         working-directory: extensions/wxt
         run: bun run check
 
+      - name: Run unit tests
+        working-directory: extensions/wxt
+        run: bun run test:unit
+
       - name: Package WXT release artifacts
         working-directory: extensions/wxt
         run: bun run package:release
 
-      - name: Install legacy parity dependencies
-        working-directory: extensions/sidecar
-        run: bun install --frozen-lockfile
-
       - name: Install Playwright Chromium
-        working-directory: extensions/sidecar
+        working-directory: extensions/wxt
         run: bunx playwright install --with-deps chromium
 
-      - name: Run legacy unit tests
-        working-directory: extensions/sidecar
-        run: bun run test:unit
-
-      - name: Run WXT parity browser tests
-        working-directory: extensions/sidecar
-        run: bunx playwright test tests/e2e/wxt-parity.spec.ts
+      - name: Run browser tests (parity + demo host)
+        working-directory: extensions/wxt
+        run: bun run test:e2e
 
       - name: Setup Node for website
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -65,7 +61,7 @@ jobs:
         working-directory: web
         run: npm run build
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: sidecar-release-artifacts

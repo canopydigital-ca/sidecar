@@ -1,8 +1,10 @@
 <script lang="ts">
-  export let faqs: Array<{
-    question: string;
-    answer: string;
-  }> = [];
+  let { faqs = [] }: {
+    faqs?: Array<{
+      question: string;
+      answer: string;
+    }>;
+  } = $props();
 </script>
 
 <section class="py-32 bg-zinc-900 border-t border-zinc-800">

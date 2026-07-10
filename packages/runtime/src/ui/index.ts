@@ -6,6 +6,7 @@ import WelcomePopover from './components/WelcomePopover.svelte';
 import OverlayRoot from './OverlayRoot.svelte';
 import type { ComponentProps } from './types';
 import { createShadowWrapper, type ShadowWrapper } from './shadow';
+import { getConfiguredShadowCssText } from './styles';
 // @ts-ignore
 import appCss from './app.css?inline';
 // @ts-ignore
@@ -97,11 +98,25 @@ export function openWelcomePopover(mode: 'intro' | 'changelog' | 'welcome' | 'de
     left: '0',
     width: '0',
     height: '0',
-    zIndex: '10000'
+    pointerEvents: 'auto',
+    // Above the dock stage (2147483000/1). Hosting inside #cgpt-ext-root (below)
+    // keeps this ordering stable even though the dock reinserts its root to the
+    // end of <body> to stay on top of the page.
+    zIndex: '2147483647'
   });
-  document.body.appendChild(host);
+  // Mount inside the dock's overlay root when present so the modal shares its
+  // stacking context and rides along with dock reinsertions — a body-level
+  // sibling at equal z-index loses the DOM-order tiebreak once the dock
+  // re-appends #cgpt-ext-root. Fall back to <body> before the dock exists.
+  const overlayRoot = document.getElementById('cgpt-ext-root');
+  (overlayRoot ?? document.body).appendChild(host);
 
-  const css = [appCss, stylesCss].filter(Boolean).join('\n');
+  // Use the configured (compiled) shadow CSS the dock/overlay use — the raw
+  // app.css?inline is uncompiled ("@import tailwindcss"), so relying on it
+  // here left this popover unstyled in the WXT build. Falls back to the inline
+  // CSS only when runtime styles have not been configured (tests/demo).
+  const fallbackCss = [appCss, stylesCss].filter(Boolean).join('\n');
+  const css = getConfiguredShadowCssText(fallbackCss);
   const instance = new ShadowMount(host, WelcomePopover, {
     mode,
     version,

@@ -1,8 +1,7 @@
 <script lang="ts">
-  export let variant: 'hero' | 'cta' = 'hero';
-  export let href = '#';
+  let { variant = 'hero', href = '#' }: { variant?: 'hero' | 'cta'; href?: string } = $props();
 
-  const compactClass = variant === 'hero' ? '' : 'scale-95';
+  const compactClass = $derived(variant === 'hero' ? '' : 'scale-95');
 </script>
 
 <a
